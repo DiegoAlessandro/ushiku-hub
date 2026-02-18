@@ -1,4 +1,5 @@
 import { StoreCard } from '@/components/StoreCard';
+import { InteractiveMap } from '@/components/InteractiveMap';
 import { getStores } from '@/lib/db';
 import { Store } from '@/types';
 import { Search, Map as MapIcon, Utensils, Scissors, ShoppingBag, Zap, Info, GraduationCap, Megaphone, MessageSquarePlus } from 'lucide-react';
@@ -171,7 +172,7 @@ export default async function Home(props: {
           )}
         </nav>
 
-        <div className="mb-8 flex items-center justify-between">
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h2 className="text-2xl font-black text-slate-900 tracking-tight">
               {q ? `「${q}」の検索結果` : category ? navItems.find(n => n.id === category)?.label : '最新の街ネタ'}
@@ -180,11 +181,22 @@ export default async function Home(props: {
               {q ? `${stores.length}件見つかりました` : '牛久市のSNSや公式情報をAIがリアルタイムに集約しています'}
             </p>
           </div>
-          <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-full border border-blue-100 text-xs font-bold">
+          <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-full border border-blue-100 text-xs font-bold w-fit">
             <Info size={14} />
             毎時自動更新
           </div>
         </div>
+
+        {/* Map View (Task #31) */}
+        {!q && (
+          <div className="mb-10">
+            <div className="flex items-center gap-2 mb-4 text-xs font-bold text-slate-400 uppercase tracking-widest">
+              <MapIcon size={14} />
+              街のマップから探す
+            </div>
+            <InteractiveMap stores={stores} />
+          </div>
+        )}
 
         {error ? (
           <div className="bg-red-50 border border-red-100 rounded-2xl p-12 text-center">
