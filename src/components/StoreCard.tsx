@@ -73,6 +73,9 @@ export function StoreCard({ store }: StoreCardProps) {
   const isNewOpen = store.tags?.includes('開店') || store.tags?.includes('オープン');
   const isClosing = store.tags?.includes('閉店');
 
+  // お得情報バッジ (Task #7)
+  const isDeals = store.tags?.includes('クーポン') || store.tags?.includes('セール') || store.tags?.includes('特売');
+
   // SNSシェアURLの生成 (Task #34)
   const shareText = encodeURIComponent(`【牛久ナビ】${store.name} の最新情報をチェック！\n#牛久市 #牛久ナビ #街ネタ\n`);
   const shareUrl = encodeURIComponent(`https://ushiku-hub.jp/?q=${store.name}`);
@@ -119,6 +122,11 @@ export function StoreCard({ store }: StoreCardProps) {
           {isClosing && (
             <span className="text-[10px] font-black tracking-widest px-2 py-0.5 rounded-md bg-red-500 text-white border border-red-600 shadow-sm">
               閉店情報
+            </span>
+          )}
+          {isDeals && (
+            <span className="text-[10px] font-black tracking-widest px-2 py-0.5 rounded-md bg-orange-500 text-white border border-orange-600 shadow-sm animate-pulse">
+              お得情報あり
             </span>
           )}
         </div>
