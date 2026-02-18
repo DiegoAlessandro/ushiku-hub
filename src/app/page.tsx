@@ -178,17 +178,24 @@ export default async function Home(props: {
       {/* Footer */}
       <footer className="bg-white border-t border-slate-100 mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center text-center">
             <div className="flex items-center gap-2 mb-6">
               <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-white">
                 <MapIcon size={18} />
               </div>
               <span className="font-black text-slate-900 tracking-tight">USHIKU HUB</span>
             </div>
+            
+            <div className="max-w-2xl mb-8">
+              <p className="text-[10px] text-slate-400 leading-relaxed">
+                【免責事項】当サイト「牛久ナビ」は、AIエージェントを用いてインターネット上の公開情報を自動収集・集約している試験的なポータルサイトです。情報の正確性、最新性、妥当性については細心の注意を払っておりますが、これらを保証するものではありません。掲載情報に基づいた判断や行動により生じた損害等について、当サイトは一切の責任を負いかねます。最新かつ正確な情報は、各店舗・団体の公式サイトやSNSを直接ご確認ください。
+              </p>
+            </div>
+
             <p className="text-slate-400 text-xs font-bold uppercase tracking-[0.2em] mb-4">
               © 2026 Powered by OpenClaw Agent
             </p>
-            <div className="flex gap-6">
+            <div className="flex flex-wrap justify-center gap-4 sm:gap-8">
               <span className="text-[10px] text-slate-300 font-bold uppercase tracking-widest">Instagram Scraping</span>
               <span className="text-[10px] text-slate-300 font-bold uppercase tracking-widest">Public Web News</span>
               <span className="text-[10px] text-slate-300 font-bold uppercase tracking-widest">AI Categorization</span>
