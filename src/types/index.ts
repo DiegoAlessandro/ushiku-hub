@@ -3,7 +3,7 @@ export interface Store {
   id: string;
   name: string;
   category: 'food' | 'beauty' | 'shop' | 'event' | 'education' | 'jobs' | 'other';
-  source: 'instagram' | 'twitter' | 'web';
+  source: 'instagram' | 'twitter' | 'web' | 'WEEKEND-GUIDE' | 'AI-Curated';
   sourceUrl: string;
   content: string;
   imageUrl?: string;
@@ -19,6 +19,28 @@ export interface Store {
   longitude?: number;
   tags: string[];
   isPublished: boolean;
+}
+
+// UI状態の型定義
+export type ViewMode = 'list' | 'map';
+export type ThemeMode = 'light' | 'dark' | 'system';
+export type CategoryId = Store['category'];
+
+export interface CategoryConfig {
+  id: CategoryId;
+  label: string;
+  iconName: string;
+  color: {
+    light: string;
+    dark: string;
+  };
+}
+
+export interface NavItem {
+  id: string;
+  label: string;
+  href: string;
+  iconName: string;
 }
 
 // 収集データの型

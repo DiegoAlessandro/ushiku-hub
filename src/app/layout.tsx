@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { ThemeProvider } from "@/providers/ThemeProvider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -30,20 +31,34 @@ export const viewport: Viewport = {
   maximumScale: 1,
 };
 
+// SSRダークモードフラッシュ防止スクリプト
+const themeScript = `
+(function(){
+  try {
+    var t = localStorage.getItem('ushiku_theme');
+    var d = (t === 'dark') || (t !== 'light' && window.matchMedia('(prefers-color-scheme:dark)').matches);
+    document.documentElement.setAttribute('data-theme', d ? 'dark' : 'light');
+  } catch(e) {}
+})();
+`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ja">
+    <html lang="ja" suppressHydrationWarning>
       <head>
         <link rel="icon" href="/favicon.ico" />
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

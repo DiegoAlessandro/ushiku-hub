@@ -34,35 +34,88 @@ export async function saveStore(store: CollectedData): Promise<void> {
   `;
 }
 
-// 店舗一覧を取得
+// 店舗一覧を取得（パラメータ化クエリでSQLインジェクション対策）
 export async function getStores(
   category?: string,
   limit: number = 50,
   search?: string,
   tag?: string
 ): Promise<Store[]> {
-  let baseQuery = 'SELECT * FROM stores WHERE is_published = true';
-  
+  // カテゴリ・タグ・検索の有無で分岐（neon tagged templateはパラメータ化済み）
+  if (category && tag && search) {
+    const result = await sql`
+      SELECT * FROM stores WHERE is_published = true
+        AND category = ${category}
+        AND ${tag} = ANY(tags)
+        AND (name ILIKE ${'%' + search + '%'} OR content ILIKE ${'%' + search + '%'})
+      ORDER BY collected_at DESC LIMIT ${limit}`;
+    return result as Store[];
+  }
+  if (category && tag) {
+    const result = await sql`
+      SELECT * FROM stores WHERE is_published = true
+        AND category = ${category}
+        AND ${tag} = ANY(tags)
+      ORDER BY collected_at DESC LIMIT ${limit}`;
+    return result as Store[];
+  }
+  if (category && search) {
+    const result = await sql`
+      SELECT * FROM stores WHERE is_published = true
+        AND category = ${category}
+        AND (name ILIKE ${'%' + search + '%'} OR content ILIKE ${'%' + search + '%'})
+      ORDER BY collected_at DESC LIMIT ${limit}`;
+    return result as Store[];
+  }
+  if (tag && search) {
+    const result = await sql`
+      SELECT * FROM stores WHERE is_published = true
+        AND ${tag} = ANY(tags)
+        AND (name ILIKE ${'%' + search + '%'} OR content ILIKE ${'%' + search + '%'})
+      ORDER BY collected_at DESC LIMIT ${limit}`;
+    return result as Store[];
+  }
   if (category) {
-    baseQuery += ` AND category = '${category}'`;
+    const result = await sql`
+      SELECT * FROM stores WHERE is_published = true
+        AND category = ${category}
+      ORDER BY collected_at DESC LIMIT ${limit}`;
+    return result as Store[];
   }
-  
   if (tag) {
-    baseQuery += ` AND '${tag}' = ANY(tags)`;
+    const result = await sql`
+      SELECT * FROM stores WHERE is_published = true
+        AND ${tag} = ANY(tags)
+      ORDER BY collected_at DESC LIMIT ${limit}`;
+    return result as Store[];
   }
-  
   if (search) {
-    baseQuery += ` AND (name ILIKE '%${search}%' OR content ILIKE '%${search}%')`;
+    const result = await sql`
+      SELECT * FROM stores WHERE is_published = true
+        AND (name ILIKE ${'%' + search + '%'} OR content ILIKE ${'%' + search + '%'})
+      ORDER BY collected_at DESC LIMIT ${limit}`;
+    return result as Store[];
   }
-  
-  baseQuery += ` ORDER BY collected_at DESC LIMIT ${limit}`;
-  
-  const result = await sql(baseQuery);
-  return result as any;
+  const result = await sql`
+    SELECT * FROM stores WHERE is_published = true
+    ORDER BY collected_at DESC LIMIT ${limit}`;
+  return result as Store[];
+}
+
+// カテゴリ別件数を集計（全件取得を回避）
+export async function getCategoryCounts(): Promise<Record<string, number>> {
+  const result = await sql`
+    SELECT category, COUNT(*)::int as count
+    FROM stores WHERE is_published = true
+    GROUP BY category`;
+  return (result as Array<{ category: string; count: number }>).reduce(
+    (acc, row) => ({ ...acc, [row.category]: row.count }),
+    {} as Record<string, number>
+  );
 }
 
 // 単一店舗取得
 export async function getStoreById(id: string): Promise<Store | null> {
   const result = await sql`SELECT * FROM stores WHERE id = ${id}`;
-  return (result[0] as any) || null;
+  return (result[0] as Store) ?? null;
 }
