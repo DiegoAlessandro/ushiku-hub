@@ -10,7 +10,14 @@ async function integratedCollector() {
 
   const queries = [
     "site:instagram.com #牛久グルメ",
-    "site:instagram.com #牛久市"
+    "site:instagram.com #牛久市",
+    "site:instagram.com #うしくさんぽ",
+    "site:instagram.com #ひたち野うしく",
+    "site:instagram.com #牛久テイクアウト",
+    "site:instagram.com #牛久駅",
+    "site:instagram.com #牛久大仏",
+    "site:instagram.com #牛久シャトー",
+    "site:instagram.com #牛久習い事"
   ];
 
   for (const query of queries) {
