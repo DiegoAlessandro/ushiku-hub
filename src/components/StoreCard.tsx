@@ -1,5 +1,5 @@
 import { Store } from '@/types';
-import { ExternalLink, MapPin, Instagram, Globe, Calendar, GraduationCap } from 'lucide-react';
+import { ExternalLink, MapPin, Instagram, Globe, Calendar, GraduationCap, AlertCircle } from 'lucide-react';
 
 interface StoreCardProps {
   store: Store;
@@ -32,6 +32,8 @@ export function StoreCard({ store }: StoreCardProps) {
     });
   };
 
+  const reportUrl = `https://docs.google.com/forms/d/e/1FAIpQLSfYourFormId/viewform?entry.123456=${encodeURIComponent(store.name)}`;
+
   return (
     <article className="group bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl hover:border-blue-100 transition-all duration-300 flex flex-col overflow-hidden">
       {/* Image Section */}
@@ -56,11 +58,22 @@ export function StoreCard({ store }: StoreCardProps) {
       
       {/* Content Section */}
       <div className="p-5 flex flex-col flex-grow">
-        <div className="flex items-center gap-2 mb-3 text-slate-400 text-xs">
-          <Calendar size={14} />
-          <time dateTime={new Date(store.collectedAt || new Date()).toISOString()}>
-            {formatDate(store.collectedAt || new Date())}
-          </time>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2 text-slate-400 text-xs">
+            <Calendar size={14} />
+            <time dateTime={new Date(store.collectedAt || new Date()).toISOString()}>
+              {formatDate(store.collectedAt || new Date())}
+            </time>
+          </div>
+          <a 
+            href={reportUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-slate-300 hover:text-red-400 transition-colors"
+            title="情報の誤りを報告"
+          >
+            <AlertCircle size={14} />
+          </a>
         </div>
         
         <h3 className="font-bold text-xl text-slate-900 mb-2 group-hover:text-blue-600 transition-colors line-clamp-1">
