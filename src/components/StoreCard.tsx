@@ -21,12 +21,31 @@ export function StoreCard({ store }: StoreCardProps) {
   const CategoryIcon = config.icon;
 
   const formatDate = (date: Date) => {
+    const now = new Date();
+    const diffInMs = now.getTime() - new Date(date).getTime();
+    const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    const diffInDays = Math.floor(diffInHours / 24);
+
+    if (diffInMinutes < 1) return 'たった今';
+    if (diffInMinutes < 60) return `${diffInMinutes}分前`;
+    if (diffInHours < 24) return `${diffInHours}時間前`;
+    if (diffInDays < 7) return `${diffInDays}日前`;
+
     return new Date(date).toLocaleDateString('ja-JP', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
     });
   };
+
+  const isBrandNew = (date: Date) => {
+    const diffInMs = new Date().getTime() - new Date(date).getTime();
+    return diffInMs < 1000 * 60 * 60 * 3; // 3時間以内
+  };
+
+  const isNew = isBrandNew(store.collectedAt || new Date());
+
 
   const getBusinessStatus = () => {
     if (!store.businessHours) return null;
@@ -106,10 +125,11 @@ export function StoreCard({ store }: StoreCardProps) {
       <div className="p-5 flex flex-col flex-grow">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2 text-slate-500 text-xs font-medium">
-            <Calendar size={14} />
-            <time dateTime={new Date(store.collectedAt || new Date()).toISOString()}>
+            <Calendar size={14} className={isNew ? "text-blue-500" : ""} />
+            <time dateTime={new Date(store.collectedAt || new Date()).toISOString()} className={isNew ? "text-blue-600 font-bold" : ""}>
               {formatDate(store.collectedAt || new Date())}
             </time>
+            {isNew && <span className="flex h-2 w-2 rounded-full bg-blue-500 animate-ping" />}
           </div>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 border-r border-slate-100 pr-3 mr-1">
