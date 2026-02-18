@@ -1,5 +1,6 @@
 import { Store } from '@/types';
 import { ExternalLink, MapPin, Instagram, Globe, Calendar, GraduationCap, AlertCircle, Clock } from 'lucide-react';
+import Image from 'next/image';
 
 interface StoreCardProps {
   store: Store;
@@ -32,7 +33,7 @@ export function StoreCard({ store }: StoreCardProps) {
     });
   };
 
-  // 営業中かどうかの簡易判定 (Task #12)
+  // 営業中かどうかの簡易判定
   const getBusinessStatus = () => {
     if (!store.businessHours) return null;
 
@@ -42,7 +43,6 @@ export function StoreCard({ store }: StoreCardProps) {
       const currentMinute = now.getMinutes();
       const currentTime = currentHour * 60 + currentMinute;
 
-      // "10:45-23:15" のような形式を想定
       const [start, end] = store.businessHours.split('-');
       if (!start || !end) return null;
 
@@ -52,11 +52,9 @@ export function StoreCard({ store }: StoreCardProps) {
       const startTime = startH * 60 + startM;
       let endTime = endH * 60 + endM;
 
-      // 深夜営業対応 (例: 10:00-02:00)
       if (endTime < startTime) {
         endTime += 24 * 60;
         if (currentTime < startTime) {
-          // 日を跨いだ後の早朝対応
           const adjustedCurrent = currentTime + 24 * 60;
           return adjustedCurrent >= startTime && adjustedCurrent <= endTime;
         }
@@ -81,10 +79,13 @@ export function StoreCard({ store }: StoreCardProps) {
         className="aspect-[16/10] relative overflow-hidden bg-slate-100 block"
       >
         {store.imageUrl ? (
-          <img
+          <Image
             src={store.imageUrl}
             alt={store.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
+            loading="lazy"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-slate-400">
