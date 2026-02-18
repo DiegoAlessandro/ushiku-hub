@@ -12,12 +12,13 @@ export default async function Home(props: {
 }) {
   const searchParams = await props.searchParams;
   const category = typeof searchParams.category === 'string' ? searchParams.category : undefined;
+  const q = typeof searchParams.q === 'string' ? searchParams.q : undefined;
 
   let stores: Store[] = [];
   let error = '';
 
   try {
-    stores = await getStores(category, 50);
+    stores = await getStores(category, 50, q);
   } catch (e) {
     error = 'データの取得に失敗しました';
     console.error(e);
@@ -51,9 +52,9 @@ export default async function Home(props: {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50/50">
+    <div className="min-h-screen bg-slate-50/50 text-slate-900">
       {/* Urgent News Banner (Task #8) */}
-      {urgentNews.length > 0 && !category && (
+      {urgentNews.length > 0 && !category && !q && (
         <div className="bg-red-600 text-white py-2.5 px-4 overflow-hidden relative">
           <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
             <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -83,18 +84,33 @@ export default async function Home(props: {
               <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200">
                 <MapIcon size={24} strokeWidth={2.5} />
               </div>
-              <div>
+              <a href="/">
                 <h1 className="text-xl font-black text-slate-900 tracking-tight">
                   牛久ナビ <span className="text-blue-600">USHIKU HUB</span>
                 </h1>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1">
                   Autonomous Local Intelligence
                 </p>
-              </div>
+              </a>
+            </div>
+
+            {/* Search Bar (Task #27) */}
+            <div className="flex-grow max-w-md mx-auto md:mx-8">
+              <form action="/" method="GET" className="relative group">
+                <input
+                  type="text"
+                  name="q"
+                  defaultValue={q}
+                  placeholder="お店やキーワードで検索..."
+                  className="w-full bg-slate-100 border-none rounded-2xl py-2.5 pl-11 pr-4 text-sm font-medium focus:ring-2 focus:ring-blue-500 transition-all outline-none"
+                />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors" size={18} />
+                {category && <input type="hidden" name="category" value={category} />}
+              </form>
             </div>
 
             {/* Desktop Nav */}
-            <nav className="hidden md:flex items-center gap-1 p-1 bg-slate-100 rounded-xl border border-slate-200">
+            <nav className="hidden xl:flex items-center gap-1 p-1 bg-slate-100 rounded-xl border border-slate-200">
               {navItems.map((item) => (
                 <a
                   key={item.id}
@@ -115,8 +131,8 @@ export default async function Home(props: {
             </nav>
           </div>
 
-          {/* Mobile Nav */}
-          <nav className="flex md:hidden items-center gap-2 overflow-x-auto pb-4 no-scrollbar">
+          {/* Mobile/Tablet Nav */}
+          <nav className="flex xl:hidden items-center gap-2 overflow-x-auto pb-4 no-scrollbar">
             {navItems.map((item) => (
               <a
                 key={item.id}
@@ -139,10 +155,18 @@ export default async function Home(props: {
         {/* Breadcrumbs (Task #49) */}
         <nav className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6">
           <a href="/" className="hover:text-blue-600 transition-colors">HOME</a>
-          {category && (
+          {(category || q) && (
             <>
               <span className="text-slate-300">/</span>
-              <span className="text-slate-900">{navItems.find(n => n.id === category)?.label}</span>
+              <span className={!q ? "text-slate-900" : "text-slate-400"}>
+                {category ? navItems.find(n => n.id === category)?.label : '検索'}
+              </span>
+            </>
+          )}
+          {q && (
+            <>
+              <span className="text-slate-300">/</span>
+              <span className="text-slate-900">「{q}」の検索結果</span>
             </>
           )}
         </nav>
@@ -150,10 +174,10 @@ export default async function Home(props: {
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-black text-slate-900 tracking-tight">
-              {category ? navItems.find(n => n.id === category)?.label : '最新の街ネタ'}
+              {q ? `「${q}」の検索結果` : category ? navItems.find(n => n.id === category)?.label : '最新の街ネタ'}
             </h2>
             <p className="text-sm text-slate-500 font-medium">
-              牛久市のSNSや公式情報をAIがリアルタイムに集約しています
+              {q ? `${stores.length}件見つかりました` : '牛久市のSNSや公式情報をAIがリアルタイムに集約しています'}
             </p>
           </div>
           <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-full border border-blue-100 text-xs font-bold">
@@ -172,10 +196,17 @@ export default async function Home(props: {
             <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300">
               <Search size={40} />
             </div>
-            <p className="text-slate-900 font-black text-xl italic">NO DATA COLLECTED YET</p>
-            <p className="text-slate-400 text-sm mt-2 max-w-xs mx-auto">
-              OpenClawエージェントが街の情報を収集しています。しばらくお待ちください。
+            <p className="text-slate-900 font-black text-xl italic uppercase">
+              {q ? 'Result not found' : 'No data collected yet'}
             </p>
+            <p className="text-slate-400 text-sm mt-2 max-w-xs mx-auto">
+              {q ? '別のキーワードで試してみてください。' : 'OpenClawエージェントが街の情報を収集しています。しばらくお待ちください。'}
+            </p>
+            {q && (
+              <a href="/" className="inline-block mt-6 text-sm font-bold text-blue-600 hover:underline">
+                すべて表示に戻る
+              </a>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -213,7 +244,7 @@ export default async function Home(props: {
             </div>
 
             <div className="max-w-2xl mb-8">
-              <p className="text-[10px] text-slate-400 leading-relaxed">
+              <p className="text-[10px] text-slate-400 leading-relaxed text-justify md:text-center">
                 【免責事項】当サイト「牛久ナビ」は、AIエージェントを用いてインターネット上の公開情報を自動収集・集約している試験的なポータルサイトです。情報の正確性、最新性、妥当性については細心の注意を払っておりますが、これらを保証するものではありません。掲載情報に基づいた判断や行動により生じた損害等について、当サイトは一切の責任を負いかねます。最新かつ正確な情報は、各店舗・団体の公式サイトやSNSを直接ご確認ください。
               </p>
             </div>
@@ -221,7 +252,7 @@ export default async function Home(props: {
             <p className="text-slate-400 text-xs font-bold uppercase tracking-[0.2em] mb-4">
               © 2026 Powered by OpenClaw Agent
             </p>
-            <div className="flex flex-wrap justify-center gap-4 sm:gap-8">
+            <div className="flex flex-wrap justify-center gap-4 sm:gap-8 border-t border-slate-50 pt-8 w-full">
               <span className="text-[10px] text-slate-300 font-bold uppercase tracking-widest">Instagram Scraping</span>
               <span className="text-[10px] text-slate-300 font-bold uppercase tracking-widest">Public Web News</span>
               <span className="text-[10px] text-slate-300 font-bold uppercase tracking-widest">AI Categorization</span>

@@ -28,23 +28,44 @@ export async function saveStore(store: CollectedData): Promise<void> {
 // 店舗一覧を取得
 export async function getStores(
   category?: string,
-  limit: number = 50
+  limit: number = 50,
+  search?: string
 ): Promise<Store[]> {
-  const result = category
-    ? await sql`
-        SELECT * FROM stores 
-        WHERE category = ${category} AND is_published = true
-        ORDER BY collected_at DESC 
-        LIMIT ${limit}
-      `
-    : await sql`
-        SELECT * FROM stores 
-        WHERE is_published = true
-        ORDER BY collected_at DESC 
-        LIMIT ${limit}
-      `;
-  
-  return result as Store[];
+  let query = '';
+  const params: any[] = [];
+
+  if (category && search) {
+    return await sql`
+      SELECT * FROM stores 
+      WHERE category = ${category} 
+      AND (name ILIKE ${'%' + search + '%'} OR content ILIKE ${'%' + search + '%'})
+      AND is_published = true
+      ORDER BY collected_at DESC 
+      LIMIT ${limit}
+    ` as Store[];
+  } else if (category) {
+    return await sql`
+      SELECT * FROM stores 
+      WHERE category = ${category} AND is_published = true
+      ORDER BY collected_at DESC 
+      LIMIT ${limit}
+    ` as Store[];
+  } else if (search) {
+    return await sql`
+      SELECT * FROM stores 
+      WHERE (name ILIKE ${'%' + search + '%'} OR content ILIKE ${'%' + search + '%'})
+      AND is_published = true
+      ORDER BY collected_at DESC 
+      LIMIT ${limit}
+    ` as Store[];
+  } else {
+    return await sql`
+      SELECT * FROM stores 
+      WHERE is_published = true
+      ORDER BY collected_at DESC 
+      LIMIT ${limit}
+    ` as Store[];
+  }
 }
 
 // 単一店舗取得
