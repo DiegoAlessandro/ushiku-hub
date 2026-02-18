@@ -121,9 +121,12 @@ body {
   box-shadow: var(--glass-shadow);
 }
 
-/* ===== Theme transition ===== */
-*, *::before, *::after {
-  transition-property: background-color, border-color, box-shadow;
-  transition-duration: 0.2s;
-  transition-timing-function: ease;
+/* ===== Vaul Drawer ===== */
+[vaul-drawer] {
+  touch-action: none;
+}
+
+[vaul-overlay] {
+  position: fixed;
+  inset: 0;
 }

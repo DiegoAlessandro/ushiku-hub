@@ -35,9 +35,11 @@ export function StoreCard({ store, onSelect }: StoreCardProps) {
       'transition-all duration-300 flex flex-col overflow-hidden'
     )}>
       {/* Image */}
-      <button
-        type="button"
+      <div
+        role="button"
+        tabIndex={0}
         onClick={() => onSelect(store)}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(store); } }}
         className="aspect-[16/10] relative overflow-hidden bg-surface-tertiary block cursor-pointer w-full text-left"
         aria-label={`${store.name}の詳細を見る`}
       >
@@ -97,7 +99,7 @@ export function StoreCard({ store, onSelect }: StoreCardProps) {
             <Eye size={24} strokeWidth={3} />
           </div>
         </div>
-      </button>
+      </div>
 
       {/* Content */}
       <div className="p-5 flex flex-col flex-grow">

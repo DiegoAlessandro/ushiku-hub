@@ -20,26 +20,33 @@ export function StoreDetailSheet({ store, onClose }: StoreDetailSheetProps) {
     <Drawer.Root
       open={isOpen}
       onOpenChange={(open) => { if (!open) onClose(); }}
+      noBodyStyles
     >
       <Drawer.Portal>
-        <Drawer.Overlay className="fixed inset-0 z-[150] bg-black/40" />
+        <Drawer.Overlay
+          className="fixed inset-0 z-[150] bg-black/40"
+          style={{ pointerEvents: isOpen ? 'auto' : 'none', opacity: isOpen ? 1 : 0 }}
+        />
         <Drawer.Content
           className={cn(
             'fixed bottom-0 left-0 right-0 z-[200]',
-            'bg-surface-elevated rounded-t-3xl',
+            'rounded-t-3xl',
             'max-h-[90vh] flex flex-col',
-            'md:left-auto md:right-0 md:top-0 md:bottom-0 md:rounded-t-none md:rounded-l-3xl md:max-w-[480px]'
+            'outline-none'
           )}
-          aria-label={store ? `${store.name}の詳細` : '店舗詳細'}
+          style={{ backgroundColor: 'var(--surface-elevated, #fff)' }}
         >
           {/* Drag Handle */}
-          <div className="flex justify-center pt-3 pb-2 md:hidden">
-            <div className="w-12 h-1.5 rounded-full bg-border-primary" />
-          </div>
+          <Drawer.Handle className="mt-2 mb-1" />
+
+          {/* Radix Dialog requires Title for a11y */}
+          <Drawer.Title className="sr-only">
+            {store?.name ?? '店舗詳細'}
+          </Drawer.Title>
 
           {store && (
             <>
-              {/* Header */}
+              {/* Visible Header */}
               <div className="flex items-start justify-between px-6 py-4 border-b border-border-primary shrink-0">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
@@ -49,31 +56,28 @@ export function StoreDetailSheet({ store, onClose }: StoreDetailSheetProps) {
                       </span>
                     )}
                   </div>
-                  <Drawer.Title className="text-xl font-black text-text-primary truncate">
+                  <h2 className="text-xl font-black text-text-primary truncate">
                     {store.name}
-                  </Drawer.Title>
+                  </h2>
                   <p className="text-[10px] text-text-tertiary font-bold uppercase tracking-widest mt-1">
                     Source: {store.source}
                   </p>
                 </div>
-                <Drawer.Close asChild>
-                  <button
-                    className="p-2 hover:bg-surface-tertiary rounded-full transition-colors text-text-tertiary ml-2 shrink-0"
-                    aria-label="閉じる"
-                  >
-                    <X size={22} />
-                  </button>
-                </Drawer.Close>
+                <button
+                  onClick={onClose}
+                  className="p-2 hover:bg-surface-tertiary rounded-full transition-colors text-text-tertiary ml-2 shrink-0"
+                  aria-label="閉じる"
+                >
+                  <X size={22} />
+                </button>
               </div>
 
               {/* Scrollable Content */}
               <div className="overflow-y-auto flex-1 px-6 py-6 space-y-6 no-scrollbar overscroll-contain">
-                {/* Content */}
                 <p className="text-text-secondary leading-relaxed font-medium whitespace-pre-wrap text-sm">
                   {store.content}
                 </p>
 
-                {/* Info Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {store.address && (
                     <a
@@ -103,7 +107,6 @@ export function StoreDetailSheet({ store, onClose }: StoreDetailSheetProps) {
                   )}
                 </div>
 
-                {/* Tags */}
                 {store.tags && store.tags.length > 0 && (
                   <div className="flex flex-wrap gap-2">
                     {store.tags.map((t) => (
@@ -115,7 +118,6 @@ export function StoreDetailSheet({ store, onClose }: StoreDetailSheetProps) {
                   </div>
                 )}
 
-                {/* Instagram Embed */}
                 {store.source === 'instagram' && (
                   <div className="space-y-3">
                     <div className="flex items-center gap-2 text-xs font-black text-text-tertiary uppercase tracking-widest">
@@ -126,7 +128,6 @@ export function StoreDetailSheet({ store, onClose }: StoreDetailSheetProps) {
                   </div>
                 )}
 
-                {/* Action */}
                 <a
                   href={store.sourceUrl}
                   target="_blank"
