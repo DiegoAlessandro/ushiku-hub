@@ -1,45 +1,42 @@
-import { web_search } from "openclaw-core";
+import { web_search, web_fetch } from "openclaw-core";
 // @ts-ignore
 const { finalizeStoreData } = require("./data-finalizer");
 
 /**
- * 牛久市内の主要スーパーのチラシ・特売情報を収集するエージェント
+ * 牛久市内の主要スーパー（カスミ、ヨークベニマル、タイヨー等）の最新チラシ・セール情報を収集する
  */
 async function supermarketCollector() {
-  console.log("🛒 牛久スーパー特売情報の収集を開始...");
+  console.log("🛒 スーパーマーケット特売情報の巡回を開始...");
 
-  const shops = [
-    "カスミ 牛久",
-    "ヨークベニマル 牛久",
-    "フードスクエア 牛久",
-    "ディスカウントストア ヒーロー 牛久",
-    "業務スーパー 牛久"
+  const queries = [
+    "カスミ 牛久市 チラシ 最新",
+    "ヨークベニマル 牛久市 特売",
+    "タイヨー 牛久店 セール情報",
+    "ヒーロー 牛久中央店 チラシ"
   ];
 
-  for (const shop of shops) {
-    console.log(`🔎 Searching for: ${shop}`);
-    const results = await web_search({ 
-        query: `${shop} 最新チラシ 特売 お買い得`, 
-        count: 3, 
-        search_lang: "jp" 
-    });
+  for (const query of queries) {
+    const results = await web_search({ query, count: 3, search_lang: "jp" });
 
     for (const result of results.results) {
+        console.log(`📡 スーパー情報発見: ${result.title}`);
+        
         const rawData = {
-            name: shop,
+            name: result.title.split(' | ')[0].split(' - ')[0],
             category: 'shop',
             source: 'web',
             sourceUrl: result.url,
-            content: `【特売・チラシ情報】${result.title}\n${result.description}`,
-            imageUrl: "", // 将来的にチラシ画像をパース
+            content: `【スーパー特売情報】${result.description || "チラシをチェックしてください"}`,
+            imageUrl: "", // 将来的にチラシ画像を抽出
             postedAt: new Date().toISOString()
         };
 
+        // 名寄せとAI要約を経て保存
         await finalizeStoreData(rawData);
     }
   }
 
-  console.log("🏁 スーパー情報収集サイクル完了");
+  console.log("🏁 スーパー巡回完了");
 }
 
-// 実行
+// 運用フローに統合済み
