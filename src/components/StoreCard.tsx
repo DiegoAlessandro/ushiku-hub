@@ -1,5 +1,5 @@
 import { Store } from '@/types';
-import { ExternalLink, MapPin, Instagram, Globe, Calendar, GraduationCap, AlertCircle, Clock } from 'lucide-react';
+import { ExternalLink, MapPin, Instagram, Globe, Calendar, GraduationCap, AlertCircle, Clock, Share2 } from 'lucide-react';
 import Image from 'next/image';
 
 interface StoreCardProps {
@@ -69,6 +69,12 @@ export function StoreCard({ store }: StoreCardProps) {
   const isOpen = getBusinessStatus();
   const reportUrl = `https://docs.google.com/forms/d/e/1FAIpQLSfYourFormId/viewform?entry.123456=${encodeURIComponent(store.name)}`;
 
+  // SNSシェアURLの生成 (Task #34)
+  const shareText = encodeURIComponent(`【牛久ナビ】${store.name} の最新情報をチェック！\n#牛久市 #牛久ナビ #街ネタ\n`);
+  const shareUrl = encodeURIComponent(`https://ushiku-hub.jp/?q=${store.name}`);
+  const lineShareUrl = `https://social-plugins.line.me/lineit/share?url=${shareUrl}&text=${shareText}`;
+  const xShareUrl = `https://twitter.com/intent/tweet?url=${shareUrl}&text=${shareText}`;
+
   return (
     <article className="group bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl hover:border-blue-300 transition-all duration-300 flex flex-col overflow-hidden">
       {/* Image Section */}
@@ -113,15 +119,26 @@ export function StoreCard({ store }: StoreCardProps) {
               {formatDate(store.collectedAt || new Date())}
             </time>
           </div>
-          <a 
-            href={reportUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-slate-400 hover:text-red-500 transition-colors"
-            title="情報の誤りを報告"
-          >
-            <AlertCircle size={14} />
-          </a>
+          <div className="flex items-center gap-3">
+            {/* Share Tooltip simulation */}
+            <div className="flex items-center gap-2 border-r border-slate-100 pr-3 mr-1">
+              <a href={lineShareUrl} target="_blank" rel="noopener noreferrer" className="text-slate-300 hover:text-green-500 transition-colors" title="LINEで送る">
+                <Globe size={14} />
+              </a>
+              <a href={xShareUrl} target="_blank" rel="noopener noreferrer" className="text-slate-300 hover:text-slate-900 transition-colors" title="Xでシェア">
+                <Share2 size={14} />
+              </a>
+            </div>
+            <a 
+              href={reportUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-slate-400 hover:text-red-500 transition-colors"
+              title="情報の誤りを報告"
+            >
+              <AlertCircle size={14} />
+            </a>
+          </div>
         </div>
         
         <a 
