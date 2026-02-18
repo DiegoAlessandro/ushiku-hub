@@ -2,6 +2,8 @@ import { StoreCard } from '@/components/StoreCard';
 import { getStores } from '@/lib/db';
 import { Store } from '@/types';
 
+export const dynamic = 'force-dynamic';
+
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
 export default async function Home(props: {
