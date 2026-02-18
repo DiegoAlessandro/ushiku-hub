@@ -19,9 +19,11 @@ const ENHANCED_AI_PROMPT = `あなたは牛久市の地域ポータル「牛久�
 - event: お祭り、市役所のニュース、イベント、観光案内
 - other: その他
 
-【タスク2: 属性タグの抽出】
-内容から以下のキーワードがあれば抽出してください。
-「新メニュー」「クーポン」「臨時休業」「セール」「開店」「閉店」「無料体験」「生徒募集」
+【タスク2: 属性タグの抽出（超重要）】
+内容から、住民が検索しそうな以下の属性を**必ず**抽出して配列に入れてください。
+- 飲食店: 「テイクアウト可」「デリバリー可」「夜22時以降営業」「ランチあり」「禁煙」「個室あり」
+- 習い事: 「幼児向け」「小学生向け」「中高生向け」「大人向け」「無料体験あり」
+- 共通: 「新メニュー」「クーポン」「臨時休業」「セール」「開店」「閉店」「駐車場あり」「キャッシュレス対応」
 
 【タスク3: 魅力的な要約】
 親しみやすく、かつプロフェッショナルな日本語で構成してください。
@@ -29,33 +31,41 @@ const ENHANCED_AI_PROMPT = `あなたは牛久市の地域ポータル「牛久�
 出力は必ず以下のJSON形式にしてください：
 {
   "category": "food",
-  "tags": ["新メニュー", "期間限定"],
+  "tags": ["テイクアウト可", "駐車場あり", "新メニュー"],
   "summary": "【一言でいうと】\\n...\\n\\n【詳細】\\n...\\n\\n【ハッシュタグ】\\n#牛久市 #..."
 }`;
 
 async function superEnrich(id, name, content) {
-    const response = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: [
-            { role: "system", content: ENHANCED_AI_PROMPT },
-            { role: "user", content: `店名/組織名: ${name}\n内容: ${content}` },
-        ],
-        response_format: { type: "json_object" },
-    });
+    console.log(`🧠 AI Enriching (Task #3/#4): ${name}`);
+    
+    try {
+        const response = await openai.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: [
+                { role: "system", content: ENHANCED_AI_PROMPT },
+                { role: "user", content: `店名/組織名: ${name}\n内容: ${content}` },
+            ],
+            response_format: { type: "json_object" },
+        });
 
-    const result = JSON.parse(response.choices[0].message.content);
-    
-    // DB更新（カテゴリーの自動修正を含む）
-    await sql`
-      UPDATE stores 
-      SET 
-        category = ${result.category},
-        content = ${result.summary},
-        collected_at = NOW() 
-      WHERE id = ${id}
-    `;
-    
-    return result;
+        const result = JSON.parse(response.choices[0].message.content);
+        
+        // DB更新（タグの自動付与を含む）
+        await sql`
+          UPDATE stores 
+          SET 
+            category = ${result.category},
+            content = ${result.summary},
+            tags = ${result.tags},
+            collected_at = NOW() 
+          WHERE id = ${id}
+        `;
+        
+        return result;
+    } catch (e) {
+        console.error("SuperEnrich Error:", e.message);
+        return null;
+    }
 }
 
 module.exports = { superEnrich };

@@ -2,7 +2,7 @@ import { StoreCard } from '@/components/StoreCard';
 import { InteractiveMap } from '@/components/InteractiveMap';
 import { getStores } from '@/lib/db';
 import { Store } from '@/types';
-import { Search, Map as MapIcon, Utensils, Scissors, ShoppingBag, Zap, Info, GraduationCap, Megaphone, MessageSquarePlus, Tag, Heart } from 'lucide-react';
+import { Search, Map as MapIcon, Utensils, Scissors, ShoppingBag, Zap, Info, GraduationCap, Megaphone, MessageSquarePlus, Tag, Heart, Briefcase } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,15 +38,15 @@ export default async function Home(props: {
     return acc;
   }, {} as Record<string, number>);
 
-  const popularTags = ['駐車場あり', '駅近', 'ランチ', '朝食', '観光', '子連れ歓迎', 'クーポン'];
+  const popularTags = ['駐車場あり', '駅近', 'ランチ', '朝食', '観光', '子連れ歓迎', 'クーポン', 'アルバイト募集'];
 
-  // 緊急・重要ニュースのフィルタリング (タスクNo.8)
+  // 緊急・重要ニュースのフィルタリング
   const urgentNews = allStores.filter(s => 
     s.name === '牛久市役所' && 
     (s.content.includes('重要') || s.content.includes('防災') || s.content.includes('募集'))
   ).slice(0, 1);
 
-  // コンテンツの優先順位付け: AIまとめ記事を最優先 (タスクNo.11/No.39)
+  // コンテンツの優先順位付け: AIまとめ記事を最優先
   const sortedStores = [...stores].sort((a, b) => {
     if (a.source === 'AI-Curated' && b.source !== 'AI-Curated') return -1;
     if (a.source !== 'AI-Curated' && b.source === 'AI-Curated') return 1;
@@ -58,6 +58,7 @@ export default async function Home(props: {
     { id: 'food', label: '飲食', href: '/?category=food', icon: <Utensils size={18} /> },
     { id: 'beauty', label: '美容', href: '/?category=beauty', icon: <Scissors size={18} /> },
     { id: 'education', label: '習い事', href: '/?category=education', icon: <GraduationCap size={18} /> },
+    { id: 'jobs', label: '求人', href: '/?category=jobs', icon: <Briefcase size={18} /> },
     { id: 'shop', label: '買い物', href: '/?category=shop', icon: <ShoppingBag size={18} /> },
     { id: 'event', label: 'イベント', href: '/?category=event', icon: <Zap size={18} /> },
   ];
@@ -116,12 +117,12 @@ export default async function Home(props: {
             </div>
 
             <div className="flex items-center gap-4">
-              <nav className="flex items-center gap-1 p-1 bg-slate-100 rounded-xl border border-slate-200">
+              <nav className="flex items-center gap-1 p-1 bg-slate-100 rounded-xl border border-slate-200 overflow-x-auto no-scrollbar max-w-[400px]">
                 {navItems.map((item) => (
                   <a
                     key={item.id}
                     href={item.href}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
                       (!category && item.id === 'all') || category === item.id
                         ? 'bg-white text-blue-600 shadow-sm'
                         : 'text-slate-500 hover:text-slate-900 hover:bg-white/50'
@@ -138,7 +139,7 @@ export default async function Home(props: {
 
       {/* Mobile Top Header */}
       <div className="md:hidden bg-white border-b border-slate-200 sticky top-0 z-50 px-4 py-3 flex items-center justify-between backdrop-blur-md bg-white/90">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-md">
             <MapIcon size={18} strokeWidth={2.5} />
           </div>
@@ -185,6 +186,10 @@ export default async function Home(props: {
               牛久市のSNSや公式情報をAIが24時間集約中
             </p>
           </div>
+          <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-full border border-blue-100 text-xs font-bold w-fit">
+            <Info size={14} />
+            毎時自動更新
+          </div>
         </div>
 
         {/* Map View */}
@@ -203,8 +208,8 @@ export default async function Home(props: {
       </main>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-slate-200 px-6 py-3 z-[100] flex justify-between items-center shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
-        {navItems.map((item) => (
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-slate-200 px-4 py-3 z-[100] flex justify-between items-center shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+        {navItems.slice(0, 5).map((item) => (
           <a
             key={item.id}
             href={item.href}
@@ -221,12 +226,12 @@ export default async function Home(props: {
             }`}>
               {item.icon}
             </div>
-            <span className="text-[10px] font-black tracking-tighter">{item.label}</span>
+            <span className="text-[9px] font-black tracking-tighter">{item.label}</span>
           </a>
         ))}
         <button className="flex flex-col items-center gap-1 text-slate-400 opacity-30 cursor-not-allowed">
            <div className="p-2"><Heart size={18} /></div>
-           <span className="text-[10px] font-black tracking-tighter">保存済み</span>
+           <span className="text-[9px] font-black tracking-tighter">保存済み</span>
         </button>
       </nav>
 

@@ -2,7 +2,7 @@
 export interface Store {
   id: string;
   name: string;
-  category: 'food' | 'beauty' | 'shop' | 'event' | 'education' | 'other';
+  category: 'food' | 'beauty' | 'shop' | 'event' | 'education' | 'jobs' | 'other';
   source: 'instagram' | 'twitter' | 'web';
   sourceUrl: string;
   content: string;
@@ -12,17 +12,18 @@ export interface Store {
   address?: string;
   phone?: string;
   instagramAccount?: string;
-  businessHours?: string; // 例: "11:00-21:00"
-  regularHoliday?: string; // 例: "月曜日"
+  businessHours?: string;
+  regularHoliday?: string;
   latitude?: number;
   longitude?: number;
+  tags: string[];
   isPublished: boolean;
 }
 
 // 収集データの型
 export interface CollectedData {
   source: 'instagram' | 'twitter' | 'web';
-  category: 'food' | 'beauty' | 'shop' | 'event' | 'education' | 'other';
+  category: 'food' | 'beauty' | 'shop' | 'event' | 'education' | 'jobs' | 'other';
   name: string;
   content: string;
   imageUrl?: string;
@@ -35,4 +36,5 @@ export interface CollectedData {
   regularHoliday?: string;
   latitude?: number;
   longitude?: number;
+  tags?: string[];
 }
