@@ -2,7 +2,7 @@ import { StoreCard } from '@/components/StoreCard';
 import { InteractiveMap } from '@/components/InteractiveMap';
 import { getStores } from '@/lib/db';
 import { Store } from '@/types';
-import { Search, Map as MapIcon, Utensils, Scissors, ShoppingBag, Zap, Info, GraduationCap, Megaphone, MessageSquarePlus, Tag, Menu, X } from 'lucide-react';
+import { Search, Map as MapIcon, Utensils, Scissors, ShoppingBag, Zap, Info, GraduationCap, Megaphone, MessageSquarePlus, Tag, Heart } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,10 +40,18 @@ export default async function Home(props: {
 
   const popularTags = ['駐車場あり', '駅近', 'ランチ', '朝食', '観光', '子連れ歓迎', 'クーポン'];
 
+  // 緊急・重要ニュースのフィルタリング (タスクNo.8)
   const urgentNews = allStores.filter(s => 
     s.name === '牛久市役所' && 
     (s.content.includes('重要') || s.content.includes('防災') || s.content.includes('募集'))
   ).slice(0, 1);
+
+  // コンテンツの優先順位付け: AIまとめ記事を最優先 (タスクNo.11/No.39)
+  const sortedStores = [...stores].sort((a, b) => {
+    if (a.source === 'AI-Curated' && b.source !== 'AI-Curated') return -1;
+    if (a.source !== 'AI-Curated' && b.source === 'AI-Curated') return 1;
+    return 0;
+  });
 
   const navItems = [
     { id: 'all', label: 'すべて', href: '/', icon: <Search size={18} /> },
@@ -79,7 +87,7 @@ export default async function Home(props: {
         </div>
       )}
 
-      {/* Hero Section (Desktop Only Header) */}
+      {/* Desktop Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-50 backdrop-blur-md bg-white/80 hidden md:block">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-4">
@@ -107,21 +115,23 @@ export default async function Home(props: {
               </form>
             </div>
 
-            <nav className="flex items-center gap-1 p-1 bg-slate-100 rounded-xl border border-slate-200">
-              {navItems.map((item) => (
-                <a
-                  key={item.id}
-                  href={item.href}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${
-                    (!category && item.id === 'all') || category === item.id
-                      ? 'bg-white text-blue-600 shadow-sm'
-                      : 'text-slate-500 hover:text-slate-900 hover:bg-white/50'
-                  }`}
-                >
-                  {item.label}
-                </a>
-              ))}
-            </nav>
+            <div className="flex items-center gap-4">
+              <nav className="flex items-center gap-1 p-1 bg-slate-100 rounded-xl border border-slate-200">
+                {navItems.map((item) => (
+                  <a
+                    key={item.id}
+                    href={item.href}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${
+                      (!category && item.id === 'all') || category === item.id
+                        ? 'bg-white text-blue-600 shadow-sm'
+                        : 'text-slate-500 hover:text-slate-900 hover:bg-white/50'
+                    }`}
+                  >
+                    {item.label}
+                  </a>
+                ))}
+              </nav>
+            </div>
           </div>
         </div>
       </header>
@@ -148,7 +158,7 @@ export default async function Home(props: {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
-        {/* Popular Tags (Scrollable) */}
+        {/* Popular Tags */}
         <div className="flex items-center gap-2 mb-6 overflow-x-auto no-scrollbar pb-2">
           {popularTags.map((t) => (
             <a
@@ -177,7 +187,7 @@ export default async function Home(props: {
           </div>
         </div>
 
-        {/* Map View - Optimized height for mobile */}
+        {/* Map View */}
         {!q && !tag && (
           <div className="mb-10">
             <InteractiveMap stores={stores} />
@@ -186,13 +196,13 @@ export default async function Home(props: {
 
         {/* Content Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-          {stores.map((store) => (
+          {sortedStores.map((store) => (
             <StoreCard key={store.id} store={store} />
           ))}
         </div>
       </main>
 
-      {/* Mobile Bottom Navigation (Task #MobileUX) */}
+      {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-slate-200 px-6 py-3 z-[100] flex justify-between items-center shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
         {navItems.map((item) => (
           <a
@@ -214,9 +224,13 @@ export default async function Home(props: {
             <span className="text-[10px] font-black tracking-tighter">{item.label}</span>
           </a>
         ))}
+        <button className="flex flex-col items-center gap-1 text-slate-400 opacity-30 cursor-not-allowed">
+           <div className="p-2"><Heart size={18} /></div>
+           <span className="text-[10px] font-black tracking-tighter">保存済み</span>
+        </button>
       </nav>
 
-      {/* Footer (Simplified for mobile) */}
+      {/* Footer */}
       <footer className="bg-white border-t border-slate-100 mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="flex flex-col items-center text-center">
