@@ -1,6 +1,7 @@
 import { StoreCard } from '@/components/StoreCard';
 import { getStores } from '@/lib/db';
 import { Store } from '@/types';
+import { Search, Map as MapIcon, Utensils, Scissors, ShoppingBag, Zap, Info } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,10 +23,9 @@ export default async function Home(props: {
     console.error(e);
   }
 
-  // 全体のカウント用
   let allStores: Store[] = [];
   try {
-    allStores = await getStores(undefined, 100);
+    allStores = await getStores(undefined, 200);
   } catch (e) {
     console.error(e);
   }
@@ -35,110 +35,137 @@ export default async function Home(props: {
     return acc;
   }, {} as Record<string, number>);
 
+  const navItems = [
+    { id: 'all', label: 'すべて', href: '/', icon: <Search size={18} /> },
+    { id: 'food', label: '飲食', href: '/?category=food', icon: <Utensils size={18} /> },
+    { id: 'beauty', label: '美容', href: '/?category=beauty', icon: <Scissors size={18} /> },
+    { id: 'shop', label: '買い物', href: '/?category=shop', icon: <ShoppingBag size={18} /> },
+    { id: 'event', label: 'イベント', href: '/?category=event', icon: <Zap size={18} /> },
+  ];
+
   return (
-    <main className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                牛久ナビ 🐄
-              </h1>
-              <p className="text-sm text-gray-600 mt-1">
-                牛久市のお店情報を自動収集中
-              </p>
+    <div className="min-h-screen bg-slate-50/50">
+      {/* Hero Section */}
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-50 backdrop-blur-md bg-white/80">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between py-4 gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200">
+                <MapIcon size={24} strokeWidth={2.5} />
+              </div>
+              <div>
+                <h1 className="text-xl font-black text-slate-900 tracking-tight">
+                  牛久ナビ <span className="text-blue-600">USHIKU HUB</span>
+                </h1>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1">
+                  Autonomous Local Intelligence
+                </p>
+              </div>
             </div>
-            <div className="text-right text-sm text-gray-500">
-              <p>掲載店舗数</p>
-              <p className="text-2xl font-bold text-blue-600">{allStores.length}</p>
-            </div>
+
+            {/* Desktop Nav */}
+            <nav className="hidden md:flex items-center gap-1 p-1 bg-slate-100 rounded-xl border border-slate-200">
+              {navItems.map((item) => (
+                <a
+                  key={item.id}
+                  href={item.href}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${
+                    (!category && item.id === 'all') || category === item.id
+                      ? 'bg-white text-blue-600 shadow-sm'
+                      : 'text-slate-500 hover:text-slate-900 hover:bg-white/50'
+                  }`}
+                >
+                  {item.icon}
+                  {item.label}
+                  <span className="text-[10px] opacity-50 ml-1">
+                    {item.id === 'all' ? allStores.length : categoryCounts[item.id] || 0}
+                  </span>
+                </a>
+              ))}
+            </nav>
           </div>
 
-          {/* Category Filter */}
-          <div className="flex gap-2 mt-4 overflow-x-auto pb-2">
-            <a
-              href="/"
-              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap ${
-                !category ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 border hover:bg-gray-50'
-              }`}
-            >
-              すべて
-            </a>
-            <a
-              href="/?category=food"
-              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap ${
-                category === 'food' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 border hover:bg-gray-50'
-              }`}
-            >
-              飲食 ({categoryCounts['food'] || 0})
-            </a>
-            <a
-              href="/?category=beauty"
-              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap ${
-                category === 'beauty' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 border hover:bg-gray-50'
-              }`}
-            >
-              美容 ({categoryCounts['beauty'] || 0})
-            </a>
-            <a
-              href="/?category=shop"
-              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap ${
-                category === 'shop' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 border hover:bg-gray-50'
-              }`}
-            >
-              ショップ ({categoryCounts['shop'] || 0})
-            </a>
-            <a
-              href="/?category=event"
-              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap ${
-                category === 'event' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 border hover:bg-gray-50'
-              }`}
-            >
-              イベント ({categoryCounts['event'] || 0})
-            </a>
-          </div>
+          {/* Mobile Nav */}
+          <nav className="flex md:hidden items-center gap-2 overflow-x-auto pb-4 no-scrollbar">
+            {navItems.map((item) => (
+              <a
+                key={item.id}
+                href={item.href}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap border transition-all ${
+                  (!category && item.id === 'all') || category === item.id
+                    ? 'bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-100'
+                    : 'bg-white text-slate-600 border-slate-200'
+                }`}
+              >
+                {item.label}
+              </a>
+            ))}
+          </nav>
         </div>
       </header>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        {error ? (
-          <div className="text-center py-12">
-            <p className="text-red-500">{error}</p>
-            <p className="text-sm text-gray-500 mt-2">
-              データベースの接続を確認してください
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-black text-slate-900 tracking-tight">
+              {category ? navItems.find(n => n.id === category)?.label : '最新の街ネタ'}
+            </h2>
+            <p className="text-sm text-slate-500 font-medium">
+              牛久市のSNSや公式情報をAIがリアルタイムに集約しています
             </p>
           </div>
+          <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-full border border-blue-100 text-xs font-bold">
+            <Info size={14} />
+            毎時自動更新
+          </div>
+        </div>
+
+        {error ? (
+          <div className="bg-red-50 border border-red-100 rounded-2xl p-12 text-center">
+            <p className="text-red-600 font-bold">{error}</p>
+            <p className="text-sm text-red-400 mt-2">データベース接続を確認してください</p>
+          </div>
         ) : stores.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">
-              {category ? 'このカテゴリーにはまだデータがありません' : 'まだデータが収集されていません'}
-            </p>
-            <p className="text-sm text-gray-400 mt-2">
-              OpenClawエージェントがデータを収集するまでお待ちください
+          <div className="bg-white border border-slate-100 rounded-3xl p-20 text-center shadow-sm">
+            <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300">
+              <Search size={40} />
+            </div>
+            <p className="text-slate-900 font-black text-xl italic">NO DATA COLLECTED YET</p>
+            <p className="text-slate-400 text-sm mt-2 max-w-xs mx-auto">
+              OpenClawエージェントが街の情報を収集しています。しばらくお待ちください。
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {stores.map((store) => (
               <StoreCard key={store.id} store={store} />
             ))}
           </div>
         )}
-      </div>
+      </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t mt-12">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <p className="text-center text-sm text-gray-500">
-            © 2026 牛久ナビ - 牛久市のお店情報自動収集サービス
-          </p>
-          <p className="text-center text-xs text-gray-400 mt-2">
-            Instagram #牛久グルメ #牛久市 などから自動収集中
-          </p>
+      <footer className="bg-white border-t border-slate-100 mt-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="flex flex-col items-center">
+            <div className="flex items-center gap-2 mb-6">
+              <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-white">
+                <MapIcon size={18} />
+              </div>
+              <span className="font-black text-slate-900 tracking-tight">USHIKU HUB</span>
+            </div>
+            <p className="text-slate-400 text-xs font-bold uppercase tracking-[0.2em] mb-4">
+              © 2026 Powered by OpenClaw Agent
+            </p>
+            <div className="flex gap-6">
+              <span className="text-[10px] text-slate-300 font-bold uppercase tracking-widest">Instagram Scraping</span>
+              <span className="text-[10px] text-slate-300 font-bold uppercase tracking-widest">Public Web News</span>
+              <span className="text-[10px] text-slate-300 font-bold uppercase tracking-widest">AI Categorization</span>
+            </div>
+          </div>
         </div>
       </footer>
-    </main>
+    </div>
   );
 }
