@@ -38,7 +38,7 @@ export default async function Home(props: {
     return acc;
   }, {} as Record<string, number>);
 
-  const popularTags = ['駐車場あり', '駅近', 'ランチ', '朝食', '観光', '子連れ歓迎', 'クーポン', 'アルバイト募集'];
+  const popularTags = ['牛久駅エリア', 'ひたち野うしく駅エリア', '駐車場あり', '駅近', 'ランチ', '朝食', '観光', '子連れ歓迎', 'クーポン', 'アルバイト募集'];
 
   // 緊急・重要ニュースのフィルタリング
   const urgentNews = allStores.filter(s => 
