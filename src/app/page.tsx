@@ -1,7 +1,7 @@
 import { StoreCard } from '@/components/StoreCard';
 import { getStores } from '@/lib/db';
 import { Store } from '@/types';
-import { Search, Map as MapIcon, Utensils, Scissors, ShoppingBag, Zap, Info, GraduationCap, Megaphone } from 'lucide-react';
+import { Search, Map as MapIcon, Utensils, Scissors, ShoppingBag, Zap, Info, GraduationCap, Megaphone, MessageSquarePlus } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -197,6 +197,21 @@ export default async function Home(props: {
               <span className="font-black text-slate-900 tracking-tight">USHIKU HUB</span>
             </div>
             
+            <div className="max-w-2xl mb-8">
+              <p className="text-[10px] text-slate-400 leading-relaxed italic mb-6">
+                【AI改善宣言】このサイトは住民の皆様の声を爆速で反映します。「ここを直して」「こんな機能がほしい」という要望をAIが24時間受け付け、最短数分で実装に反映します。
+              </p>
+              <a 
+                href="https://forms.gle/your-feedback-form-id" 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-blue-600 transition-all shadow-lg active:scale-95"
+              >
+                <MessageSquarePlus size={18} />
+                AIに爆速改善要望を出す
+              </a>
+            </div>
+
             <div className="max-w-2xl mb-8">
               <p className="text-[10px] text-slate-400 leading-relaxed">
                 【免責事項】当サイト「牛久ナビ」は、AIエージェントを用いてインターネット上の公開情報を自動収集・集約している試験的なポータルサイトです。情報の正確性、最新性、妥当性については細心の注意を払っておりますが、これらを保証するものではありません。掲載情報に基づいた判断や行動により生じた損害等について、当サイトは一切の責任を負いかねます。最新かつ正確な情報は、各店舗・団体の公式サイトやSNSを直接ご確認ください。
