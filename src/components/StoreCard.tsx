@@ -1,5 +1,5 @@
 import { Store } from '@/types';
-import { ExternalLink, MapPin, Instagram, Globe, Calendar, GraduationCap, AlertCircle } from 'lucide-react';
+import { ExternalLink, MapPin, Instagram, Globe, Calendar, GraduationCap, AlertCircle, Clock } from 'lucide-react';
 
 interface StoreCardProps {
   store: Store;
@@ -32,6 +32,43 @@ export function StoreCard({ store }: StoreCardProps) {
     });
   };
 
+  // 営業中かどうかの簡易判定 (Task #12)
+  const getBusinessStatus = () => {
+    if (!store.businessHours) return null;
+
+    try {
+      const now = new Date();
+      const currentHour = now.getHours();
+      const currentMinute = now.getMinutes();
+      const currentTime = currentHour * 60 + currentMinute;
+
+      // "10:45-23:15" のような形式を想定
+      const [start, end] = store.businessHours.split('-');
+      if (!start || !end) return null;
+
+      const [startH, startM] = start.split(':').map(Number);
+      const [endH, endM] = end.split(':').map(Number);
+      
+      const startTime = startH * 60 + startM;
+      let endTime = endH * 60 + endM;
+
+      // 深夜営業対応 (例: 10:00-02:00)
+      if (endTime < startTime) {
+        endTime += 24 * 60;
+        if (currentTime < startTime) {
+          // 日を跨いだ後の早朝対応
+          const adjustedCurrent = currentTime + 24 * 60;
+          return adjustedCurrent >= startTime && adjustedCurrent <= endTime;
+        }
+      }
+
+      return currentTime >= startTime && currentTime <= endTime;
+    } catch (e) {
+      return null;
+    }
+  };
+
+  const isOpen = getBusinessStatus();
   const reportUrl = `https://docs.google.com/forms/d/e/1FAIpQLSfYourFormId/viewform?entry.123456=${encodeURIComponent(store.name)}`;
 
   return (
@@ -54,10 +91,15 @@ export function StoreCard({ store }: StoreCardProps) {
             {store.category === 'education' ? <GraduationCap size={48} strokeWidth={1.5} /> : <Globe size={48} strokeWidth={1.5} />}
           </div>
         )}
-        <div className="absolute top-4 left-4">
+        <div className="absolute top-4 left-4 flex flex-col gap-2">
           <span className={`text-[11px] font-bold tracking-wider px-2.5 py-1 rounded-lg border shadow-sm ${categoryColors[store.category]}`}>
             {categoryLabels[store.category]}
           </span>
+          {isOpen !== null && (
+            <span className={`text-[10px] font-black tracking-widest px-2 py-0.5 rounded-md border shadow-sm ${isOpen ? 'bg-green-500 text-white border-green-600' : 'bg-slate-500 text-white border-slate-600'}`}>
+              {isOpen ? 'OPEN' : 'CLOSED'}
+            </span>
+          )}
         </div>
       </a>
       
@@ -97,6 +139,13 @@ export function StoreCard({ store }: StoreCardProps) {
         </p>
         
         <div className="space-y-2.5 mb-6">
+          {store.businessHours && (
+            <div className="flex items-center gap-2 text-slate-600 text-xs font-bold">
+              <Clock size={14} className="text-blue-500" />
+              <span>営業時間: {store.businessHours}</span>
+              {store.regularHoliday && <span className="text-slate-400 text-[10px]">（定休日: {store.regularHoliday}）</span>}
+            </div>
+          )}
           {store.address && (
             <a 
               href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(store.address + ' ' + store.name)}`}

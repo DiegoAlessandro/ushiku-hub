@@ -12,6 +12,10 @@ export interface Store {
   address?: string;
   phone?: string;
   instagramAccount?: string;
+  businessHours?: string; // 例: "11:00-21:00"
+  regularHoliday?: string; // 例: "月曜日"
+  latitude?: number;
+  longitude?: number;
   isPublished: boolean;
 }
 
@@ -27,4 +31,8 @@ export interface CollectedData {
   address?: string;
   phone?: string;
   instagramAccount?: string;
+  businessHours?: string;
+  regularHoliday?: string;
+  latitude?: number;
+  longitude?: number;
 }
