@@ -69,6 +69,10 @@ export function StoreCard({ store }: StoreCardProps) {
   const isOpen = getBusinessStatus();
   const reportUrl = `https://docs.google.com/forms/d/e/1FAIpQLSfYourFormId/viewform?entry.123456=${encodeURIComponent(store.name)}`;
 
+  // 開店・閉店バッジ (Task #20)
+  const isNewOpen = store.tags?.includes('開店') || store.tags?.includes('オープン');
+  const isClosing = store.tags?.includes('閉店');
+
   // SNSシェアURLの生成 (Task #34)
   const shareText = encodeURIComponent(`【牛久ナビ】${store.name} の最新情報をチェック！\n#牛久市 #牛久ナビ #街ネタ\n`);
   const shareUrl = encodeURIComponent(`https://ushiku-hub.jp/?q=${store.name}`);
@@ -105,6 +109,16 @@ export function StoreCard({ store }: StoreCardProps) {
           {isOpen !== null && (
             <span className={`text-[10px] font-black tracking-widest px-2 py-0.5 rounded-md border shadow-sm ${isOpen ? 'bg-green-500 text-white border-green-600' : 'bg-slate-500 text-white border-slate-600'}`}>
               {isOpen ? 'OPEN' : 'CLOSED'}
+            </span>
+          )}
+          {isNewOpen && (
+            <span className="text-[10px] font-black tracking-widest px-2 py-0.5 rounded-md bg-yellow-400 text-black border border-yellow-500 shadow-sm animate-pulse">
+              NEW OPEN
+            </span>
+          )}
+          {isClosing && (
+            <span className="text-[10px] font-black tracking-widest px-2 py-0.5 rounded-md bg-red-500 text-white border border-red-600 shadow-sm">
+              閉店情報
             </span>
           )}
         </div>
