@@ -86,10 +86,15 @@ export function StoreCard({ store }: StoreCardProps) {
         
         <div className="space-y-2.5 mb-6">
           {store.address && (
-            <div className="flex items-start gap-2 text-slate-500 text-xs">
-              <MapPin size={14} className="mt-0.5 shrink-0 text-slate-400" />
-              <span className="line-clamp-1">{store.address}</span>
-            </div>
+            <a 
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(store.address + ' ' + store.name)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-start gap-2 text-slate-500 text-xs hover:text-blue-600 transition-colors group/map"
+            >
+              <MapPin size={14} className="mt-0.5 shrink-0 text-slate-400 group-hover/map:text-blue-500" />
+              <span className="line-clamp-1 underline underline-offset-2 decoration-slate-300 group-hover/map:decoration-blue-500">{store.address}</span>
+            </a>
           )}
           {store.instagramAccount && (
             <div className="flex items-center gap-2 text-slate-500 text-xs">
