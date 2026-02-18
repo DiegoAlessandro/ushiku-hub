@@ -2,7 +2,7 @@ import { StoreCard } from '@/components/StoreCard';
 import { InteractiveMap } from '@/components/InteractiveMap';
 import { getStores } from '@/lib/db';
 import { Store } from '@/types';
-import { Search, Map as MapIcon, Utensils, Scissors, ShoppingBag, Zap, Info, GraduationCap, Megaphone, MessageSquarePlus } from 'lucide-react';
+import { Search, Map as MapIcon, Utensils, Scissors, ShoppingBag, Zap, Info, GraduationCap, Megaphone, MessageSquarePlus, Tag } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,12 +14,13 @@ export default async function Home(props: {
   const searchParams = await props.searchParams;
   const category = typeof searchParams.category === 'string' ? searchParams.category : undefined;
   const q = typeof searchParams.q === 'string' ? searchParams.q : undefined;
+  const tag = typeof searchParams.tag === 'string' ? searchParams.tag : undefined;
 
   let stores: Store[] = [];
   let error = '';
 
   try {
-    stores = await getStores(category, 50, q);
+    stores = await getStores(category, 50, q, tag);
   } catch (e) {
     error = 'データの取得に失敗しました';
     console.error(e);
@@ -37,7 +38,10 @@ export default async function Home(props: {
     return acc;
   }, {} as Record<string, number>);
 
-  // 緊急・重要ニュースのフィルタリング (タスクNo.8)
+  // 主要な人気タグ (Task #41)
+  const popularTags = ['駐車場あり', '駅近', 'ランチ', '朝食', '観光', '子連れ歓迎', 'クーポン'];
+
+  // 緊急・重要ニュースのフィルタリング
   const urgentNews = allStores.filter(s => 
     s.name === '牛久市役所' && 
     (s.content.includes('重要') || s.content.includes('防災') || s.content.includes('募集'))
@@ -54,8 +58,8 @@ export default async function Home(props: {
 
   return (
     <div className="min-h-screen bg-slate-50/50 text-slate-900">
-      {/* Urgent News Banner (Task #8) */}
-      {urgentNews.length > 0 && !category && !q && (
+      {/* Urgent News Banner */}
+      {urgentNews.length > 0 && !category && !q && !tag && (
         <div className="bg-red-600 text-white py-2.5 px-4 overflow-hidden relative">
           <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
             <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -95,7 +99,7 @@ export default async function Home(props: {
               </a>
             </div>
 
-            {/* Search Bar (Task #27) */}
+            {/* Search Bar */}
             <div className="flex-grow max-w-md mx-auto md:mx-8">
               <form action="/" method="GET" className="relative group">
                 <input
@@ -107,6 +111,7 @@ export default async function Home(props: {
                 />
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors" size={18} />
                 {category && <input type="hidden" name="category" value={category} />}
+                {tag && <input type="hidden" name="tag" value={tag} />}
               </form>
             </div>
 
@@ -133,7 +138,7 @@ export default async function Home(props: {
           </div>
 
           {/* Mobile/Tablet Nav */}
-          <nav className="flex xl:hidden items-center gap-2 overflow-x-auto pb-4 no-scrollbar">
+          <nav className="flex xl:hidden items-center gap-2 overflow-x-auto pb-4 no-scrollbar border-t border-slate-50 pt-4">
             {navItems.map((item) => (
               <a
                 key={item.id}
@@ -148,20 +153,46 @@ export default async function Home(props: {
               </a>
             ))}
           </nav>
+
+          {/* Popular Tags Nav (Task #41) */}
+          <div className="flex items-center gap-3 py-3 overflow-x-auto no-scrollbar border-t border-slate-50">
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1 shrink-0">
+              <Tag size={12} /> Popular:
+            </span>
+            {popularTags.map((t) => (
+              <a
+                key={t}
+                href={`/?tag=${encodeURIComponent(t)}${category ? `&category=${category}` : ''}`}
+                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all border shrink-0 ${
+                  tag === t 
+                  ? 'bg-slate-900 text-white border-slate-900' 
+                  : 'bg-slate-50 text-slate-500 border-slate-100 hover:border-slate-300'
+                }`}
+              >
+                #{t}
+              </a>
+            ))}
+          </div>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        {/* Breadcrumbs (Task #49) */}
+        {/* Breadcrumbs */}
         <nav className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6">
           <a href="/" className="hover:text-blue-600 transition-colors">HOME</a>
-          {(category || q) && (
+          {(category || q || tag) && (
             <>
               <span className="text-slate-300">/</span>
-              <span className={!q ? "text-slate-900" : "text-slate-400"}>
+              <span className={!(q || tag) ? "text-slate-900" : "text-slate-400"}>
                 {category ? navItems.find(n => n.id === category)?.label : '検索'}
               </span>
+            </>
+          )}
+          {tag && (
+            <>
+              <span className="text-slate-300">/</span>
+              <span className={!q ? "text-slate-900" : "text-slate-400"}>#{tag}</span>
             </>
           )}
           {q && (
@@ -175,10 +206,10 @@ export default async function Home(props: {
         <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h2 className="text-2xl font-black text-slate-900 tracking-tight">
-              {q ? `「${q}」の検索結果` : category ? navItems.find(n => n.id === category)?.label : '最新の街ネタ'}
+              {q ? `「${q}」の検索結果` : tag ? `#${tag}` : category ? navItems.find(n => n.id === category)?.label : '最新の街ネタ'}
             </h2>
             <p className="text-sm text-slate-500 font-medium">
-              {q ? `${stores.length}件見つかりました` : '牛久市のSNSや公式情報をAIがリアルタイムに集約しています'}
+              {q || tag ? `${stores.length}件見つかりました` : '牛久市のSNSや公式情報をAIがリアルタイムに集約しています'}
             </p>
           </div>
           <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-full border border-blue-100 text-xs font-bold w-fit">
@@ -187,8 +218,8 @@ export default async function Home(props: {
           </div>
         </div>
 
-        {/* Map View (Task #31) */}
-        {!q && (
+        {/* Map View */}
+        {!q && !tag && (
           <div className="mb-10">
             <div className="flex items-center gap-2 mb-4 text-xs font-bold text-slate-400 uppercase tracking-widest">
               <MapIcon size={14} />
@@ -209,12 +240,12 @@ export default async function Home(props: {
               <Search size={40} />
             </div>
             <p className="text-slate-900 font-black text-xl italic uppercase">
-              {q ? 'Result not found' : 'No data collected yet'}
+              {q || tag ? 'Result not found' : 'No data collected yet'}
             </p>
             <p className="text-slate-400 text-sm mt-2 max-w-xs mx-auto">
-              {q ? '別のキーワードで試してみてください。' : 'OpenClawエージェントが街の情報を収集しています。しばらくお待ちください。'}
+              {q || tag ? '別の条件で試してみてください。' : 'OpenClawエージェントが街の情報を収集しています。しばらくお待ちください。'}
             </p>
-            {q && (
+            {(q || tag) && (
               <a href="/" className="inline-block mt-6 text-sm font-bold text-blue-600 hover:underline">
                 すべて表示に戻る
               </a>

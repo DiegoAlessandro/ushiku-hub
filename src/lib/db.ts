@@ -12,14 +12,14 @@ export async function saveStore(store: CollectedData): Promise<void> {
     INSERT INTO stores (
       id, name, category, source, source_url, content, image_url, 
       posted_at, address, phone, instagram_account, 
-      business_hours, regular_holiday, latitude, longitude,
+      business_hours, regular_holiday, latitude, longitude, tags,
       is_published, collected_at
     ) VALUES (
       gen_random_uuid(), ${store.name}, ${store.category}, ${store.source}, 
       ${store.sourceUrl}, ${store.content}, ${store.imageUrl}, 
       ${store.postedAt}, ${store.address}, ${store.phone}, 
       ${store.instagramAccount}, ${store.businessHours}, ${store.regularHoliday},
-      ${store.latitude}, ${store.longitude},
+      ${store.latitude}, ${store.longitude}, ${store.tags || []},
       true, NOW()
     )
     ON CONFLICT (source_url) DO UPDATE SET
@@ -29,6 +29,7 @@ export async function saveStore(store: CollectedData): Promise<void> {
       regular_holiday = EXCLUDED.regular_holiday,
       latitude = EXCLUDED.latitude,
       longitude = EXCLUDED.longitude,
+      tags = EXCLUDED.tags,
       collected_at = NOW()
   `;
 }
@@ -37,40 +38,27 @@ export async function saveStore(store: CollectedData): Promise<void> {
 export async function getStores(
   category?: string,
   limit: number = 50,
-  search?: string
+  search?: string,
+  tag?: string
 ): Promise<Store[]> {
-  if (category && search) {
-    return await sql`
-      SELECT * FROM stores 
-      WHERE category = ${category} 
-      AND (name ILIKE ${'%' + search + '%'} OR content ILIKE ${'%' + search + '%'})
-      AND is_published = true
-      ORDER BY collected_at DESC 
-      LIMIT ${limit}
-    ` as any;
-  } else if (category) {
-    return await sql`
-      SELECT * FROM stores 
-      WHERE category = ${category} AND is_published = true
-      ORDER BY collected_at DESC 
-      LIMIT ${limit}
-    ` as any;
-  } else if (search) {
-    return await sql`
-      SELECT * FROM stores 
-      WHERE (name ILIKE ${'%' + search + '%'} OR content ILIKE ${'%' + search + '%'})
-      AND is_published = true
-      ORDER BY collected_at DESC 
-      LIMIT ${limit}
-    ` as any;
-  } else {
-    return await sql`
-      SELECT * FROM stores 
-      WHERE is_published = true
-      ORDER BY collected_at DESC 
-      LIMIT ${limit}
-    ` as any;
+  let baseQuery = 'SELECT * FROM stores WHERE is_published = true';
+  
+  if (category) {
+    baseQuery += ` AND category = '${category}'`;
   }
+  
+  if (tag) {
+    baseQuery += ` AND '${tag}' = ANY(tags)`;
+  }
+  
+  if (search) {
+    baseQuery += ` AND (name ILIKE '%${search}%' OR content ILIKE '%${search}%')`;
+  }
+  
+  baseQuery += ` ORDER BY collected_at DESC LIMIT ${limit}`;
+  
+  const result = await sql(baseQuery);
+  return result as any;
 }
 
 // 単一店舗取得
