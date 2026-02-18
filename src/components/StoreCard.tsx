@@ -1,5 +1,5 @@
 import { Store } from '@/types';
-import { ExternalLink, MapPin, Instagram, Globe, Calendar, GraduationCap, AlertCircle, Clock, Share2 } from 'lucide-react';
+import { ExternalLink, MapPin, Instagram, Globe, Calendar, GraduationCap, AlertCircle, Clock, Share2, UtensilsCrossed, Scissors, ShoppingBag, Zap, Briefcase, Info } from 'lucide-react';
 import Image from 'next/image';
 
 interface StoreCardProps {
@@ -7,23 +7,18 @@ interface StoreCardProps {
 }
 
 export function StoreCard({ store }: StoreCardProps) {
-  const categoryLabels: Record<string, string> = {
-    food: '飲食',
-    beauty: '美容',
-    shop: '買い物',
-    event: 'イベント',
-    education: '習い事',
-    other: 'その他'
+  const categoryConfig: Record<string, { label: string, color: string, icon: any }> = {
+    food: { label: '飲食', color: 'bg-orange-100 text-orange-700 border-orange-200', icon: UtensilsCrossed },
+    beauty: { label: '美容', color: 'bg-pink-100 text-pink-700 border-pink-200', icon: Scissors },
+    shop: { label: '買い物', color: 'bg-blue-100 text-blue-700 border-blue-200', icon: ShoppingBag },
+    event: { label: 'イベント', color: 'bg-emerald-100 text-emerald-700 border-emerald-200', icon: Zap },
+    education: { label: '習い事', color: 'bg-purple-100 text-purple-700 border-purple-200', icon: GraduationCap },
+    jobs: { label: '求人', color: 'bg-indigo-100 text-indigo-700 border-indigo-200', icon: Briefcase },
+    other: { label: 'その他', color: 'bg-slate-100 text-slate-700 border-slate-200', icon: Info }
   };
 
-  const categoryColors: Record<string, string> = {
-    food: 'bg-orange-100 text-orange-700 border-orange-200',
-    beauty: 'bg-pink-100 text-pink-700 border-pink-200',
-    shop: 'bg-blue-100 text-blue-700 border-blue-200',
-    event: 'bg-emerald-100 text-emerald-700 border-emerald-200',
-    education: 'bg-purple-100 text-purple-700 border-purple-200',
-    other: 'bg-slate-100 text-slate-700 border-slate-200'
-  };
+  const config = categoryConfig[store.category] || categoryConfig.other;
+  const CategoryIcon = config.icon;
 
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString('ja-JP', {
@@ -102,12 +97,13 @@ export function StoreCard({ store }: StoreCardProps) {
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-slate-400">
-            {store.category === 'education' ? <GraduationCap size={48} strokeWidth={1.5} /> : <Globe size={48} strokeWidth={1.5} />}
+            <CategoryIcon size={48} strokeWidth={1.5} />
           </div>
         )}
         <div className="absolute top-4 left-4 flex flex-col gap-2">
-          <span className={`text-[11px] font-bold tracking-wider px-2.5 py-1 rounded-lg border shadow-sm ${categoryColors[store.category]}`}>
-            {categoryLabels[store.category]}
+          <span className={`text-[11px] font-bold tracking-wider px-2.5 py-1 rounded-lg border shadow-sm flex items-center gap-1.5 ${config.color}`}>
+            <CategoryIcon size={12} strokeWidth={2.5} />
+            {config.label}
           </span>
           {isOpen !== null && (
             <span className={`text-[10px] font-black tracking-widest px-2 py-0.5 rounded-md border shadow-sm ${isOpen ? 'bg-green-500 text-white border-green-600' : 'bg-slate-500 text-white border-slate-600'}`}>
