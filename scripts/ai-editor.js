@@ -21,47 +21,46 @@ const ENHANCED_AI_PROMPT = `あなたは牛久市の地域ポータル「牛久�
 - other: その他
 
 【タスク2: 属性タグの抽出（超重要）】
-内容から、住民が検索しそうな以下の属性を**必ず**抽出して配列に入れてください。
-- エリア判定: 「牛久駅エリア」「ひたち野うしく駅エリア」 (住所や店名から推測)
-- 飲食店: 「テイクアウト可」「デリバリー可」「夜22時以降営業」「ランチあり」「禁煙」「個室あり」
-- 習い事: 「幼児向け」「小学生向け」「中高生向け」「大人向け」「無料体験あり」
-- 共通: 「新メニュー」「クーポン」「臨時休業」「セール」「開店」「閉店」「駐車場あり」「キャッシュレス対応」「アルバイト募集」
+内容から、住民が検索しそうな属性を抽出してください（エリア、テイクアウト、対象年齢など）。
 
 【タスク3: 最強の要約（市民メリット優先）】
-読者が一瞬で「自分に関係がある！」「お得だ！」と思えるコピーを作成してください。
-1. 【一言でいうと】: 30文字以内。冒頭に必ず具体的なメリット（【無料】【半額】【新店】【駅近】等）を入れ、地名や店名を含めてキャッチーに。
-2. 【詳細】: 100文字以内。住民が「いつ、どこで、何をすべきか」が分かるように具体的に。
-3. 【ハッシュタグ】: 牛久に関連するタグを3つ。
+1. 【一言でいうと】: 30文字以内。メリット冒頭。
+2. 【詳細】: 100文字以内。具体的。
+
+【タスク4: 画像の言語化 (Vision代行)】
+画像URLが提供されている場合、その画像の内容を簡潔に（50文字以内）説明してください。
+例: 「牛久駅前のラーメン店で提供されている特製醤油ラーメンのアップ写真」
 
 出力は必ず以下のJSON形式にしてください：
 {
   "category": "food",
-  "tags": ["テイクアウト可", "駐車場あり", "新メニュー"],
-  "summary": "【一言でいうと】\\n...\\n\\n【詳細】\\n...\\n\\n【ハッシュタグ】\\n#牛久市 #..."
+  "tags": [],
+  "summary": "",
+  "imageAlt": "画像の説明文"
 }`;
 
-async function superEnrich(id, name, content) {
-    console.log(`🧠 AI Enriching (Task #3/#4): ${name}`);
+async function superEnrich(id, name, content, imageUrl = null) {
+    console.log(`🧠 AI Enriching (Task #23 Vision): ${name}`);
     
     try {
         const response = await openai.chat.completions.create({
-            model: "gpt-4o-mini",
+            model: "gpt-4o-mini", // Vision対応モデル
             messages: [
                 { role: "system", content: ENHANCED_AI_PROMPT },
-                { role: "user", content: `店名/組織名: ${name}\n内容: ${content}` },
+                { role: "user", content: `店名: ${name}\n内容: ${content}${imageUrl ? `\n画像URL: ${imageUrl}` : ''}` },
             ],
             response_format: { type: "json_object" },
         });
 
         const result = JSON.parse(response.choices[0].message.content);
         
-        // DB更新（タグの自動付与を含む）
         await sql`
           UPDATE stores 
           SET 
             category = ${result.category},
             content = ${result.summary},
             tags = ${result.tags},
+            image_alt = ${result.imageAlt},
             collected_at = NOW() 
           WHERE id = ${id}
         `;

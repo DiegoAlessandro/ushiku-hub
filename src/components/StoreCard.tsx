@@ -28,25 +28,19 @@ export function StoreCard({ store }: StoreCardProps) {
     });
   };
 
-  // 営業中かどうかの簡易判定
   const getBusinessStatus = () => {
     if (!store.businessHours) return null;
-
     try {
       const now = new Date();
       const currentHour = now.getHours();
       const currentMinute = now.getMinutes();
       const currentTime = currentHour * 60 + currentMinute;
-
       const [start, end] = store.businessHours.split('-');
       if (!start || !end) return null;
-
       const [startH, startM] = start.split(':').map(Number);
       const [endH, endM] = end.split(':').map(Number);
-      
       const startTime = startH * 60 + startM;
       let endTime = endH * 60 + endM;
-
       if (endTime < startTime) {
         endTime += 24 * 60;
         if (currentTime < startTime) {
@@ -54,24 +48,16 @@ export function StoreCard({ store }: StoreCardProps) {
           return adjustedCurrent >= startTime && adjustedCurrent <= endTime;
         }
       }
-
       return currentTime >= startTime && currentTime <= endTime;
-    } catch (e) {
-      return null;
-    }
+    } catch (e) { return null; }
   };
 
   const isOpen = getBusinessStatus();
   const reportUrl = `https://docs.google.com/forms/d/e/1FAIpQLSfYourFormId/viewform?entry.123456=${encodeURIComponent(store.name)}`;
-
-  // 開店・閉店バッジ (Task #20)
   const isNewOpen = store.tags?.includes('開店') || store.tags?.includes('オープン');
   const isClosing = store.tags?.includes('閉店');
-
-  // お得情報バッジ (Task #7)
   const isDeals = store.tags?.includes('クーポン') || store.tags?.includes('セール') || store.tags?.includes('特売');
 
-  // SNSシェアURLの生成 (Task #34)
   const shareText = encodeURIComponent(`【牛久ナビ】${store.name} の最新情報をチェック！\n#牛久市 #牛久ナビ #街ネタ\n`);
   const shareUrl = encodeURIComponent(`https://ushiku-hub.jp/?q=${store.name}`);
   const lineShareUrl = `https://social-plugins.line.me/lineit/share?url=${shareUrl}&text=${shareText}`;
@@ -79,17 +65,11 @@ export function StoreCard({ store }: StoreCardProps) {
 
   return (
     <article className="group bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl hover:border-blue-300 transition-all duration-300 flex flex-col overflow-hidden">
-      {/* Image Section */}
-      <a 
-        href={store.sourceUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="aspect-[16/10] relative overflow-hidden bg-slate-100 block"
-      >
+      <a href={store.sourceUrl} target="_blank" rel="noopener noreferrer" className="aspect-[16/10] relative overflow-hidden bg-slate-100 block">
         {store.imageUrl ? (
           <Image
             src={store.imageUrl}
-            alt={store.name}
+            alt={store.imageAlt || store.name}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -115,11 +95,6 @@ export function StoreCard({ store }: StoreCardProps) {
               NEW OPEN
             </span>
           )}
-          {isClosing && (
-            <span className="text-[10px] font-black tracking-widest px-2 py-0.5 rounded-md bg-red-500 text-white border border-red-600 shadow-sm">
-              閉店情報
-            </span>
-          )}
           {isDeals && (
             <span className="text-[10px] font-black tracking-widest px-2 py-0.5 rounded-md bg-orange-500 text-white border border-orange-600 shadow-sm animate-pulse">
               お得情報あり
@@ -128,7 +103,6 @@ export function StoreCard({ store }: StoreCardProps) {
         </div>
       </a>
       
-      {/* Content Section */}
       <div className="p-5 flex flex-col flex-grow">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2 text-slate-500 text-xs font-medium">
@@ -138,7 +112,6 @@ export function StoreCard({ store }: StoreCardProps) {
             </time>
           </div>
           <div className="flex items-center gap-3">
-            {/* Share Tooltip simulation */}
             <div className="flex items-center gap-2 border-r border-slate-100 pr-3 mr-1">
               <a href={lineShareUrl} target="_blank" rel="noopener noreferrer" className="text-slate-300 hover:text-green-500 transition-colors" title="LINEで送る">
                 <Globe size={14} />
@@ -147,24 +120,13 @@ export function StoreCard({ store }: StoreCardProps) {
                 <Share2 size={14} />
               </a>
             </div>
-            <a 
-              href={reportUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-slate-400 hover:text-red-500 transition-colors"
-              title="情報の誤りを報告"
-            >
+            <a href={reportUrl} target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-red-500 transition-colors" title="情報の誤りを報告">
               <AlertCircle size={14} />
             </a>
           </div>
         </div>
         
-        <a 
-          href={store.sourceUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block group/title"
-        >
+        <a href={store.sourceUrl} target="_blank" rel="noopener noreferrer" className="block group/title">
           <h3 className="font-bold text-xl text-slate-900 mb-2 group-hover/title:text-blue-600 transition-colors line-clamp-1">
             {store.name}
           </h3>
@@ -183,12 +145,7 @@ export function StoreCard({ store }: StoreCardProps) {
             </div>
           )}
           {store.address && (
-            <a 
-              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(store.address + ' ' + store.name)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-start gap-2 text-slate-600 text-xs hover:text-blue-600 transition-colors group/map"
-            >
+            <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(store.address + ' ' + store.name)}`} target="_blank" rel="noopener noreferrer" className="flex items-start gap-2 text-slate-600 text-xs hover:text-blue-600 transition-colors group/map">
               <MapPin size={14} className="mt-0.5 shrink-0 text-slate-500 group-hover/map:text-blue-600" />
               <span className="line-clamp-1 underline underline-offset-4 decoration-slate-300 group-hover/map:decoration-blue-600 font-medium">{store.address}</span>
             </a>
@@ -201,7 +158,6 @@ export function StoreCard({ store }: StoreCardProps) {
           )}
         </div>
         
-        {/* Footer Action */}
         <div className="pt-4 border-t border-slate-100 flex items-center justify-between mt-auto">
           <div className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-blue-600 shadow-[0_0_8px_rgba(37,99,235,0.5)]" />
@@ -209,12 +165,7 @@ export function StoreCard({ store }: StoreCardProps) {
               {store.source}
             </span>
           </div>
-          <a
-            href={store.sourceUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition-all shadow-md shadow-blue-100 active:scale-95"
-          >
+          <a href={store.sourceUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition-all shadow-md shadow-blue-100 active:scale-95">
             詳しく見る
             <ExternalLink size={14} />
           </a>

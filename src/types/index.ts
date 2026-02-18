@@ -7,6 +7,7 @@ export interface Store {
   sourceUrl: string;
   content: string;
   imageUrl?: string;
+  imageAlt?: string; // AI生成された画像説明 (Task #23)
   postedAt: Date;
   collectedAt: Date;
   address?: string;
@@ -27,6 +28,7 @@ export interface CollectedData {
   name: string;
   content: string;
   imageUrl?: string;
+  imageAlt?: string;
   sourceUrl: string;
   postedAt: string;
   address?: string;
