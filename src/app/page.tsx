@@ -1,7 +1,7 @@
 import { StoreCard } from '@/components/StoreCard';
 import { getStores } from '@/lib/db';
 import { Store } from '@/types';
-import { Search, Map as MapIcon, Utensils, Scissors, ShoppingBag, Zap, Info } from 'lucide-react';
+import { Search, Map as MapIcon, Utensils, Scissors, ShoppingBag, Zap, Info, GraduationCap } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,6 +39,7 @@ export default async function Home(props: {
     { id: 'all', label: 'すべて', href: '/', icon: <Search size={18} /> },
     { id: 'food', label: '飲食', href: '/?category=food', icon: <Utensils size={18} /> },
     { id: 'beauty', label: '美容', href: '/?category=beauty', icon: <Scissors size={18} /> },
+    { id: 'education', label: '習い事', href: '/?category=education', icon: <GraduationCap size={18} /> },
     { id: 'shop', label: '買い物', href: '/?category=shop', icon: <ShoppingBag size={18} /> },
     { id: 'event', label: 'イベント', href: '/?category=event', icon: <Zap size={18} /> },
   ];

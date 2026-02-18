@@ -2,7 +2,7 @@
 export interface Store {
   id: string;
   name: string;
-  category: 'food' | 'beauty' | 'shop' | 'event' | 'other';
+  category: 'food' | 'beauty' | 'shop' | 'event' | 'education' | 'other';
   source: 'instagram' | 'twitter' | 'web';
   sourceUrl: string;
   content: string;
@@ -18,7 +18,7 @@ export interface Store {
 // 収集データの型
 export interface CollectedData {
   source: 'instagram' | 'twitter' | 'web';
-  category: 'food' | 'beauty' | 'shop' | 'event' | 'other';
+  category: 'food' | 'beauty' | 'shop' | 'event' | 'education' | 'other';
   name: string;
   content: string;
   imageUrl?: string;

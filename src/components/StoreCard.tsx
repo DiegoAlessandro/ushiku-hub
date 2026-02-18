@@ -1,5 +1,5 @@
 import { Store } from '@/types';
-import { ExternalLink, MapPin, Instagram, Globe, Calendar } from 'lucide-react';
+import { ExternalLink, MapPin, Instagram, Globe, Calendar, GraduationCap } from 'lucide-react';
 
 interface StoreCardProps {
   store: Store;
@@ -11,6 +11,7 @@ export function StoreCard({ store }: StoreCardProps) {
     beauty: '美容',
     shop: '買い物',
     event: 'イベント',
+    education: '習い事',
     other: 'その他'
   };
 
@@ -19,6 +20,7 @@ export function StoreCard({ store }: StoreCardProps) {
     beauty: 'bg-pink-50 text-pink-600 border-pink-100',
     shop: 'bg-blue-50 text-blue-600 border-blue-100',
     event: 'bg-emerald-50 text-emerald-600 border-emerald-100',
+    education: 'bg-purple-50 text-purple-600 border-purple-100',
     other: 'bg-slate-50 text-slate-600 border-slate-100'
   };
 
@@ -42,7 +44,7 @@ export function StoreCard({ store }: StoreCardProps) {
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-slate-300">
-            <Globe size={48} strokeWidth={1} />
+            {store.category === 'education' ? <GraduationCap size={48} strokeWidth={1} /> : <Globe size={48} strokeWidth={1} />}
           </div>
         )}
         <div className="absolute top-4 left-4">
