@@ -1,7 +1,7 @@
 import { StoreCard } from '@/components/StoreCard';
 import { getStores } from '@/lib/db';
 import { Store } from '@/types';
-import { Search, Map as MapIcon, Utensils, Scissors, ShoppingBag, Zap, Info, GraduationCap } from 'lucide-react';
+import { Search, Map as MapIcon, Utensils, Scissors, ShoppingBag, Zap, Info, GraduationCap, Megaphone } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,6 +35,12 @@ export default async function Home(props: {
     return acc;
   }, {} as Record<string, number>);
 
+  // 緊急・重要ニュースのフィルタリング (タスクNo.8)
+  const urgentNews = allStores.filter(s => 
+    s.name === '牛久市役所' && 
+    (s.content.includes('重要') || s.content.includes('防災') || s.content.includes('募集'))
+  ).slice(0, 1);
+
   const navItems = [
     { id: 'all', label: 'すべて', href: '/', icon: <Search size={18} /> },
     { id: 'food', label: '飲食', href: '/?category=food', icon: <Utensils size={18} /> },
@@ -46,6 +52,29 @@ export default async function Home(props: {
 
   return (
     <div className="min-h-screen bg-slate-50/50">
+      {/* Urgent News Banner (Task #8) */}
+      {urgentNews.length > 0 && !category && (
+        <div className="bg-red-600 text-white py-2.5 px-4 overflow-hidden relative">
+          <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <Megaphone size={18} className="shrink-0 animate-bounce" />
+              <p className="text-sm font-black tracking-tight truncate">
+                <span className="bg-white text-red-600 px-1.5 py-0.5 rounded text-[10px] mr-2">重要</span>
+                {urgentNews[0].content.split('\n')[0]}
+              </p>
+            </div>
+            <a 
+              href={urgentNews[0].sourceUrl} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-[11px] font-bold underline whitespace-nowrap hover:opacity-80"
+            >
+              詳細を見る
+            </a>
+          </div>
+        </div>
+      )}
+
       {/* Hero Section */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-50 backdrop-blur-md bg-white/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
