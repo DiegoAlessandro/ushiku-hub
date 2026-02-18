@@ -56,8 +56,8 @@ export function StoreCard({ store }: StoreCardProps) {
       <div className="p-5 flex flex-col flex-grow">
         <div className="flex items-center gap-2 mb-3 text-slate-400 text-xs">
           <Calendar size={14} />
-          <time dateTime={new Date(store.collectedAt).toISOString()}>
-            {formatDate(store.collectedAt)}
+          <time dateTime={new Date(store.collectedAt || new Date()).toISOString()}>
+            {formatDate(store.collectedAt || new Date())}
           </time>
         </div>
         
