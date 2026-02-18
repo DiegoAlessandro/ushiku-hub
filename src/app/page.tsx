@@ -2,7 +2,7 @@ import { StoreCard } from '@/components/StoreCard';
 import { InteractiveMap } from '@/components/InteractiveMap';
 import { getStores } from '@/lib/db';
 import { Store } from '@/types';
-import { Search, Map as MapIcon, Utensils, Scissors, ShoppingBag, Zap, Info, GraduationCap, Megaphone, MessageSquarePlus, Tag, Heart, Briefcase } from 'lucide-react';
+import { Search, Map as MapIcon, Utensils, Scissors, ShoppingBag, Zap, Info, GraduationCap, Megaphone, MessageSquarePlus, Tag, Heart, Briefcase, PlusCircle } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,13 +40,11 @@ export default async function Home(props: {
 
   const popularTags = ['牛久駅エリア', 'ひたち野うしく駅エリア', '駐車場あり', '駅近', 'ランチ', '朝食', '観光', '子連れ歓迎', 'クーポン', 'アルバイト募集'];
 
-  // 緊急・重要ニュースのフィルタリング
   const urgentNews = allStores.filter(s => 
     s.name === '牛久市役所' && 
     (s.content.includes('重要') || s.content.includes('防災') || s.content.includes('募集'))
   ).slice(0, 1);
 
-  // コンテンツの優先順位付け: AIまとめ記事を最優先
   const sortedStores = [...stores].sort((a, b) => {
     if (a.source === 'AI-Curated' && b.source !== 'AI-Curated') return -1;
     if (a.source !== 'AI-Curated' && b.source === 'AI-Curated') return 1;
@@ -64,7 +62,7 @@ export default async function Home(props: {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50/50 text-slate-900 pb-24 md:pb-0">
+    <div className="min-h-screen bg-slate-50/50 text-slate-900 pb-24 md:pb-0 font-sans">
       {/* Urgent News Banner */}
       {urgentNews.length > 0 && !category && !q && !tag && (
         <div className="bg-red-600 text-white py-2.5 px-4 overflow-hidden relative z-[60]">
@@ -97,8 +95,8 @@ export default async function Home(props: {
                 <MapIcon size={24} strokeWidth={2.5} />
               </div>
               <a href="/">
-                <h1 className="text-xl font-black text-slate-900 tracking-tight">
-                  牛久ナビ <span className="text-blue-600">USHIKU HUB</span>
+                <h1 className="text-xl font-black text-slate-900 tracking-tight leading-none">
+                  牛久ナビ<br/><span className="text-blue-600 text-[10px] tracking-[0.2em] font-bold">USHIKU HUB</span>
                 </h1>
               </a>
             </div>
@@ -128,6 +126,7 @@ export default async function Home(props: {
                         : 'text-slate-500 hover:text-slate-900 hover:bg-white/50'
                     }`}
                   >
+                    {item.icon}
                     {item.label}
                   </a>
                 ))}
@@ -186,10 +185,16 @@ export default async function Home(props: {
               牛久市のSNSや公式情報をAIが24時間集約中
             </p>
           </div>
-          <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-full border border-blue-100 text-xs font-bold w-fit">
-            <Info size={14} />
-            毎時自動更新
-          </div>
+          {/* Post Button (Task #35) */}
+          <a 
+            href="https://forms.gle/your-user-post-form-id" 
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl font-bold text-xs shadow-lg shadow-blue-100 hover:bg-blue-700 transition-all active:scale-95"
+          >
+            <PlusCircle size={16} />
+            街のネタを投稿
+          </a>
         </div>
 
         {/* Map View */}
@@ -239,7 +244,7 @@ export default async function Home(props: {
       <footer className="bg-white border-t border-slate-100 mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="flex flex-col items-center text-center">
-            <div className="max-w-2xl mb-12">
+            <div className="max-w-2xl mb-12 flex flex-col gap-4">
               <a 
                 href="https://forms.gle/your-feedback-form-id" 
                 target="_blank"
@@ -249,7 +254,7 @@ export default async function Home(props: {
                 <MessageSquarePlus size={20} />
                 爆速でAIに改善要望を送る
               </a>
-              <p className="text-[10px] text-slate-400 mt-4 leading-relaxed px-6">
+              <p className="text-[10px] text-slate-400 leading-relaxed italic">
                 【AI改善宣言】このサイトは住民の声を最短数分で実装に反映します。
               </p>
             </div>
