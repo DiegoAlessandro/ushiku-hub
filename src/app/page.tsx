@@ -136,6 +136,17 @@ export default async function Home(props: {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        {/* Breadcrumbs (Task #49) */}
+        <nav className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6">
+          <a href="/" className="hover:text-blue-600 transition-colors">HOME</a>
+          {category && (
+            <>
+              <span className="text-slate-300">/</span>
+              <span className="text-slate-900">{navItems.find(n => n.id === category)?.label}</span>
+            </>
+          )}
+        </nav>
+
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-black text-slate-900 tracking-tight">
