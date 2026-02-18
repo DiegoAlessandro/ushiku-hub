@@ -40,12 +40,16 @@ export default async function Home(props: {
 
   const popularTags = ['牛久駅エリア', 'ひたち野うしく駅エリア', '駐車場あり', '駅近', 'ランチ', '朝食', '観光', '子連れ歓迎', 'クーポン', 'アルバイト募集'];
 
+  // 緊急・重要ニュースのフィルタリング (タスクNo.8)
   const urgentNews = allStores.filter(s => 
     s.name === '牛久市役所' && 
     (s.content.includes('重要') || s.content.includes('防災') || s.content.includes('募集'))
   ).slice(0, 1);
 
+  // コンテンツの優先順位付け: 週末ガイド(最優先) ＞ AIまとめ記事 (タスクNo.32)
   const sortedStores = [...stores].sort((a, b) => {
+    if (a.source === 'WEEKEND-GUIDE' && b.source !== 'WEEKEND-GUIDE') return -1;
+    if (a.source !== 'WEEKEND-GUIDE' && b.source === 'WEEKEND-GUIDE') return 1;
     if (a.source === 'AI-Curated' && b.source !== 'AI-Curated') return -1;
     if (a.source !== 'AI-Curated' && b.source === 'AI-Curated') return 1;
     return 0;
@@ -175,6 +179,31 @@ export default async function Home(props: {
           ))}
         </div>
 
+        {/* Breadcrumbs */}
+        <nav className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6">
+          <a href="/" className="hover:text-blue-600 transition-colors">HOME</a>
+          {(category || q || tag) && (
+            <>
+              <span className="text-slate-300">/</span>
+              <span className={!(q || tag) ? "text-slate-900" : "text-slate-400"}>
+                {category ? navItems.find(n => n.id === category)?.label : '検索'}
+              </span>
+            </>
+          )}
+          {tag && (
+            <>
+              <span className="text-slate-300">/</span>
+              <span className={!q ? "text-slate-900" : "text-slate-400"}>#{tag}</span>
+            </>
+          )}
+          {q && (
+            <>
+              <span className="text-slate-300">/</span>
+              <span className="text-slate-900">「{q}」の検索結果</span>
+            </>
+          )}
+        </nav>
+
         <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h2 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
@@ -185,7 +214,6 @@ export default async function Home(props: {
               牛久市のSNSや公式情報をAIが24時間集約中
             </p>
           </div>
-          {/* Post Button (Task #35) */}
           <a 
             href="https://forms.gle/your-user-post-form-id" 
             target="_blank"
@@ -200,6 +228,10 @@ export default async function Home(props: {
         {/* Map View */}
         {!q && !tag && (
           <div className="mb-10">
+            <div className="flex items-center gap-2 mb-4 text-xs font-bold text-slate-400 uppercase tracking-widest">
+              <MapIcon size={14} />
+              街のマップから探す
+            </div>
             <InteractiveMap stores={stores} />
           </div>
         )}
@@ -258,6 +290,13 @@ export default async function Home(props: {
                 【AI改善宣言】このサイトは住民の声を最短数分で実装に反映します。
               </p>
             </div>
+
+            <div className="max-w-2xl mb-8">
+              <p className="text-[10px] text-slate-400 leading-relaxed text-justify md:text-center">
+                【免責事項】当サイト「牛久ナビ」は、AIエージェントを用いてインターネット上の公開情報を自動収集・集約している試験的なポータルサイトです。情報の正確性、最新性、妥当性については細心の注意を払っておりますが、これらを保証するものではありません。掲載情報に基づいた判断や行動により生じた損害等について、当サイトは一切の責任を負いかねます。最新かつ正確な情報は、各店舗・団体的公式サイトやSNSを直接ご確認ください。
+              </p>
+            </div>
+
             <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em]">
               © 2026 USHIKU HUB
             </p>
