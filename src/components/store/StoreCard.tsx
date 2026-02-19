@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import type { Store } from '@/types';
 import { ExternalLink, MapPin, Instagram, Globe, Calendar, GraduationCap, AlertCircle, Clock, Share2, Eye, Utensils, Scissors, ShoppingBag, Zap, Briefcase, Info } from 'lucide-react';
 import Image from 'next/image';
@@ -22,7 +23,18 @@ interface StoreCardProps {
   onSelect: (store: Store) => void;
 }
 
+function CategoryPlaceholder({ category }: { category: string }) {
+  const placeholder = CATEGORY_PLACEHOLDER[category] ?? CATEGORY_PLACEHOLDER.other;
+  const PlaceholderIcon = placeholder.Icon;
+  return (
+    <div className={cn('w-full h-full flex items-center justify-center bg-gradient-to-br', placeholder.gradient)}>
+      <PlaceholderIcon size={48} strokeWidth={1.5} className="text-white/70" />
+    </div>
+  );
+}
+
 export function StoreCard({ store, onSelect }: StoreCardProps) {
+  const [imgError, setImgError] = useState(false);
   const config = getCategoryConfig(store.category);
   const isOpen = getBusinessStatus(store.businessHours);
 
@@ -53,7 +65,7 @@ export function StoreCard({ store, onSelect }: StoreCardProps) {
         className="aspect-[16/10] relative overflow-hidden bg-surface-tertiary block cursor-pointer w-full text-left"
         aria-label={`${store.name}の詳細を見る`}
       >
-        {store.imageUrl ? (
+        {store.imageUrl && !imgError ? (
           <Image
             src={store.imageUrl}
             alt={store.imageAlt || store.name}
@@ -61,16 +73,11 @@ export function StoreCard({ store, onSelect }: StoreCardProps) {
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-cover group-hover:scale-105 transition-transform duration-500"
             loading="lazy"
+            onError={() => setImgError(true)}
           />
-        ) : (() => {
-          const placeholder = CATEGORY_PLACEHOLDER[store.category] ?? CATEGORY_PLACEHOLDER.other;
-          const PlaceholderIcon = placeholder.Icon;
-          return (
-            <div className={cn('w-full h-full flex items-center justify-center bg-gradient-to-br', placeholder.gradient)}>
-              <PlaceholderIcon size={48} strokeWidth={1.5} className="text-white/70" />
-            </div>
-          );
-        })()}
+        ) : (
+          <CategoryPlaceholder category={store.category} />
+        )}
 
         {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-1.5">

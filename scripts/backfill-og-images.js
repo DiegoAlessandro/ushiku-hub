@@ -13,8 +13,32 @@ const OG_IMAGE_REGEX =
 const OG_IMAGE_REGEX_REVERSE =
   /<meta\s+(?:[^>]*?\s)?content=["']([^"']+)["']\s+property=["']og:image["'][^>]*>/i;
 
+// Instagram CDNの画像は署名付き短命URLのため取得しても無意味
+const SKIP_DOMAINS = ["instagram.com", "www.instagram.com"];
+
+const HTML_ENTITIES = {
+  "&amp;": "&",
+  "&lt;": "<",
+  "&gt;": ">",
+  "&quot;": '"',
+  "&#39;": "'",
+  "&#x27;": "'",
+};
+
+function decodeHtmlEntities(str) {
+  return str.replace(
+    /&(?:amp|lt|gt|quot|#39|#x27);/g,
+    (m) => HTML_ENTITIES[m] ?? m
+  );
+}
+
 async function fetchOgImage(url) {
   try {
+    const hostname = new URL(url).hostname;
+    if (SKIP_DOMAINS.some((d) => hostname === d || hostname.endsWith(`.${d}`))) {
+      return null;
+    }
+
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
@@ -28,14 +52,16 @@ async function fetchOgImage(url) {
     if (!response.ok) return null;
 
     const html = await response.text();
-    const match = html.match(OG_IMAGE_REGEX) ?? html.match(OG_IMAGE_REGEX_REVERSE);
+    const match =
+      html.match(OG_IMAGE_REGEX) ?? html.match(OG_IMAGE_REGEX_REVERSE);
     if (!match?.[1]) return null;
 
-    const imageUrl = match[1].trim();
-    if (imageUrl.startsWith("//")) return `https:${imageUrl}`;
-    if (imageUrl.startsWith("/")) {
+    let imageUrl = decodeHtmlEntities(match[1].trim());
+    if (imageUrl.startsWith("//")) {
+      imageUrl = `https:${imageUrl}`;
+    } else if (imageUrl.startsWith("/")) {
       const origin = new URL(url).origin;
-      return `${origin}${imageUrl}`;
+      imageUrl = `${origin}${imageUrl}`;
     }
     return imageUrl;
   } catch {
@@ -64,6 +90,12 @@ async function run() {
   for (const row of rows) {
     const { id, name, source_url } = row;
     process.stdout.write(`  ${name} ... `);
+
+    if (SKIP_DOMAINS.some((d) => new URL(source_url).hostname.endsWith(d))) {
+      console.log("⏭️  Instagram (スキップ)");
+      skipped++;
+      continue;
+    }
 
     const imageUrl = await fetchOgImage(source_url);
 
