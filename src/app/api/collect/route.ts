@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { saveStore } from '@/lib/db';
+import { fetchOgImage } from '@/lib/ogp';
 import { CollectedData } from '@/types';
 
 // POST /api/collect - データ収集エンドポイント
@@ -19,6 +20,14 @@ export async function POST(request: NextRequest) {
         { error: 'Missing required fields' },
         { status: 400 }
       );
+    }
+
+    // imageUrlが未設定の場合、OGPから自動取得
+    if (!data.imageUrl && data.sourceUrl) {
+      const ogImage = await fetchOgImage(data.sourceUrl);
+      if (ogImage) {
+        data.imageUrl = ogImage;
+      }
     }
 
     // DBに保存

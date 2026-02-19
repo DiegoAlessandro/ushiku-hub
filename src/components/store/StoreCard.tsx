@@ -1,11 +1,21 @@
 'use client';
 
 import type { Store } from '@/types';
-import { ExternalLink, MapPin, Instagram, Globe, Calendar, GraduationCap, AlertCircle, Clock, Share2, Eye } from 'lucide-react';
+import { ExternalLink, MapPin, Instagram, Globe, Calendar, GraduationCap, AlertCircle, Clock, Share2, Eye, Utensils, Scissors, ShoppingBag, Zap, Briefcase, Info } from 'lucide-react';
 import Image from 'next/image';
 import { FavoriteButton } from '@/components/FavoriteButton';
 import { getCategoryConfig } from '@/lib/constants';
 import { formatDate, getBusinessStatus, cn } from '@/lib/utils';
+
+const CATEGORY_PLACEHOLDER: Record<string, { gradient: string; Icon: typeof Globe }> = {
+  food:      { gradient: 'from-orange-400 to-amber-500',   Icon: Utensils },
+  beauty:    { gradient: 'from-pink-400 to-rose-500',      Icon: Scissors },
+  shop:      { gradient: 'from-blue-400 to-indigo-500',    Icon: ShoppingBag },
+  event:     { gradient: 'from-emerald-400 to-teal-500',   Icon: Zap },
+  education: { gradient: 'from-purple-400 to-violet-500',  Icon: GraduationCap },
+  jobs:      { gradient: 'from-indigo-400 to-blue-500',    Icon: Briefcase },
+  other:     { gradient: 'from-slate-400 to-gray-500',     Icon: Info },
+};
 
 interface StoreCardProps {
   store: Store;
@@ -52,11 +62,15 @@ export function StoreCard({ store, onSelect }: StoreCardProps) {
             className="object-cover group-hover:scale-105 transition-transform duration-500"
             loading="lazy"
           />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-text-tertiary">
-            {store.category === 'education' ? <GraduationCap size={48} strokeWidth={1.5} /> : <Globe size={48} strokeWidth={1.5} />}
-          </div>
-        )}
+        ) : (() => {
+          const placeholder = CATEGORY_PLACEHOLDER[store.category] ?? CATEGORY_PLACEHOLDER.other;
+          const PlaceholderIcon = placeholder.Icon;
+          return (
+            <div className={cn('w-full h-full flex items-center justify-center bg-gradient-to-br', placeholder.gradient)}>
+              <PlaceholderIcon size={48} strokeWidth={1.5} className="text-white/70" />
+            </div>
+          );
+        })()}
 
         {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-1.5">
