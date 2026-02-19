@@ -118,7 +118,7 @@ export function StoreDetailSheet({ store, onClose }: StoreDetailSheetProps) {
                   </div>
                 )}
 
-                {store.source === 'instagram' && (
+                {store.source === 'instagram' && store.sourceUrl && (
                   <div className="space-y-3">
                     <div className="flex items-center gap-2 text-xs font-black text-text-tertiary uppercase tracking-widest">
                       <Instagram size={14} />
@@ -128,15 +128,17 @@ export function StoreDetailSheet({ store, onClose }: StoreDetailSheetProps) {
                   </div>
                 )}
 
-                <a
-                  href={store.sourceUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 w-full py-4 bg-accent-primary text-white rounded-2xl font-black text-sm hover:bg-accent-primary-hover transition-all shadow-lg"
-                >
-                  元投稿で詳しく見る
-                  <ExternalLink size={18} />
-                </a>
+                {store.sourceUrl && (
+                  <a
+                    href={store.sourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 w-full py-4 bg-accent-primary text-white rounded-2xl font-black text-sm hover:bg-accent-primary-hover transition-all shadow-lg"
+                  >
+                    元投稿で詳しく見る
+                    <ExternalLink size={18} />
+                  </a>
+                )}
               </div>
             </>
           )}

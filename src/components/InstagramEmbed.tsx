@@ -7,6 +7,7 @@ import { useEffect } from 'react';
  */
 export function InstagramEmbed({ url }: { url: string }) {
   useEffect(() => {
+    if (!url) return;
     // @ts-ignore
     if (window.instgrm) {
       // @ts-ignore
@@ -18,6 +19,8 @@ export function InstagramEmbed({ url }: { url: string }) {
       document.body.appendChild(script);
     }
   }, [url]);
+
+  if (!url) return null;
 
   // InstagramのURLを埋め込み用フォーマットに変換
   const embedUrl = url.endsWith('/') ? url : `${url}/`;
