@@ -1,19 +1,29 @@
 'use client';
 
-import { Sun, Moon } from 'lucide-react';
+import { Sun, Moon, Clock } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 import { cn } from '@/lib/utils';
+import type { ThemeMode } from '@/types';
+
+const CYCLE: ThemeMode[] = ['auto', 'light', 'dark'];
+
+const LABELS: Record<ThemeMode, string> = {
+  auto: '自動モード（時間帯で切替）',
+  light: 'ライトモード',
+  dark: 'ダークモード',
+};
 
 export function ThemeToggle() {
-  const { isDark, setTheme, theme } = useTheme();
+  const { setTheme, theme } = useTheme();
 
   const toggle = () => {
-    if (theme === 'system') {
-      setTheme(isDark ? 'light' : 'dark');
-    } else {
-      setTheme(isDark ? 'light' : 'dark');
-    }
+    const idx = CYCLE.indexOf(theme);
+    setTheme(CYCLE[(idx + 1) % CYCLE.length]);
   };
+
+  const icon = theme === 'auto' ? <Clock size={20} />
+    : theme === 'light' ? <Sun size={20} />
+    : <Moon size={20} />;
 
   return (
     <button
@@ -23,9 +33,9 @@ export function ThemeToggle() {
         'hover:bg-surface-tertiary active:scale-95',
         'text-text-secondary hover:text-text-primary'
       )}
-      aria-label={isDark ? 'ライトモードに切り替え' : 'ダークモードに切り替え'}
+      aria-label={LABELS[theme]}
     >
-      {isDark ? <Sun size={20} /> : <Moon size={20} />}
+      {icon}
     </button>
   );
 }

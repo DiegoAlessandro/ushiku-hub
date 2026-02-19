@@ -36,7 +36,9 @@ const themeScript = `
 (function(){
   try {
     var t = localStorage.getItem('ushiku_theme');
-    var d = (t === 'dark') || (t !== 'light' && window.matchMedia('(prefers-color-scheme:dark)').matches);
+    if (t === 'system') t = 'auto';
+    var h = new Date().getHours();
+    var d = (t === 'dark') || (t !== 'light' && (h < 6 || h >= 18));
     document.documentElement.setAttribute('data-theme', d ? 'dark' : 'light');
   } catch(e) {}
 })();

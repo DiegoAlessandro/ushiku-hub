@@ -23,7 +23,7 @@ export interface Store {
 
 // UI状態の型定義
 export type ViewMode = 'list' | 'map';
-export type ThemeMode = 'light' | 'dark' | 'system';
+export type ThemeMode = 'light' | 'dark' | 'auto';
 export type CategoryId = Store['category'];
 
 export interface CategoryConfig {

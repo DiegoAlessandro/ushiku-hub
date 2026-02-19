@@ -11,7 +11,7 @@ interface ThemeContextValue {
 }
 
 export const ThemeContext = createContext<ThemeContextValue>({
-  theme: 'system',
+  theme: 'auto',
   resolvedTheme: 'light',
   isDark: false,
   setTheme: () => {},
@@ -19,9 +19,9 @@ export const ThemeContext = createContext<ThemeContextValue>({
 
 const STORAGE_KEY = 'ushiku_theme';
 
-function getSystemTheme(): 'light' | 'dark' {
-  if (typeof window === 'undefined') return 'light';
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+function getAutoTheme(): 'light' | 'dark' {
+  const hour = new Date().getHours();
+  return hour >= 6 && hour < 18 ? 'light' : 'dark';
 }
 
 function applyTheme(resolved: 'light' | 'dark') {
@@ -29,40 +29,40 @@ function applyTheme(resolved: 'light' | 'dark') {
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<ThemeMode>('system');
+  const [theme, setThemeState] = useState<ThemeMode>('auto');
   const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light');
 
   // 初期化: localStorageから読み込み
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY) as ThemeMode | null;
-    const initial = stored ?? 'system';
+    const stored = localStorage.getItem(STORAGE_KEY);
+    // 旧 'system' 値の互換: autoに変換
+    const initial: ThemeMode = stored === 'light' ? 'light' : stored === 'dark' ? 'dark' : 'auto';
     setThemeState(initial);
 
-    const resolved = initial === 'system' ? getSystemTheme() : initial;
+    const resolved = initial === 'auto' ? getAutoTheme() : initial;
     setResolvedTheme(resolved);
     applyTheme(resolved);
   }, []);
 
-  // system設定時のメディアクエリ監視
+  // autoモード時: 1分ごとに時刻チェック
   useEffect(() => {
-    if (theme !== 'system') return;
+    if (theme !== 'auto') return;
 
-    const mql = window.matchMedia('(prefers-color-scheme: dark)');
-    const handler = (e: MediaQueryListEvent) => {
-      const resolved = e.matches ? 'dark' : 'light';
+    const check = () => {
+      const resolved = getAutoTheme();
       setResolvedTheme(resolved);
       applyTheme(resolved);
     };
 
-    mql.addEventListener('change', handler);
-    return () => mql.removeEventListener('change', handler);
+    const id = setInterval(check, 60_000);
+    return () => clearInterval(id);
   }, [theme]);
 
   const setTheme = useCallback((newTheme: ThemeMode) => {
     setThemeState(newTheme);
     localStorage.setItem(STORAGE_KEY, newTheme);
 
-    const resolved = newTheme === 'system' ? getSystemTheme() : newTheme;
+    const resolved = newTheme === 'auto' ? getAutoTheme() : newTheme;
     setResolvedTheme(resolved);
     applyTheme(resolved);
   }, []);
