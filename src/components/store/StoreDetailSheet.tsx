@@ -1,7 +1,7 @@
 'use client';
 
 import { Drawer } from 'vaul';
-import { X, ExternalLink, MapPin, Instagram, Clock, Tag } from 'lucide-react';
+import { X, ExternalLink, MapPin, Instagram, Clock, Tag, Phone } from 'lucide-react';
 import { InstagramEmbed } from '@/components/InstagramEmbed';
 import { cn } from '@/lib/utils';
 import { getCategoryConfig } from '@/lib/constants';
@@ -90,6 +90,18 @@ export function StoreDetailSheet({ store, onClose }: StoreDetailSheetProps) {
                       <div>
                         <p className="text-[10px] font-bold text-text-tertiary uppercase">住所</p>
                         <p className="text-sm font-bold text-text-primary group-hover:text-accent-primary transition-colors">{store.address}</p>
+                      </div>
+                    </a>
+                  )}
+                  {store.phone && (
+                    <a
+                      href={`tel:${store.phone}`}
+                      className="flex items-start gap-3 p-4 bg-surface-tertiary rounded-2xl hover:bg-accent-subtle transition-colors group"
+                    >
+                      <Phone size={18} className="text-accent-primary shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-[10px] font-bold text-text-tertiary uppercase">電話</p>
+                        <p className="text-sm font-bold text-text-primary group-hover:text-accent-primary transition-colors">{store.phone}</p>
                       </div>
                     </a>
                   )}

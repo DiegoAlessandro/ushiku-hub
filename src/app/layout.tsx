@@ -44,6 +44,34 @@ const themeScript = `
 })();
 `;
 
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      name: '牛久ナビ',
+      url: 'https://ushiku-hub.jp',
+      description: '牛久市の飲食店・美容室・イベント情報を自動収集・公開する地域ポータルサイト',
+      inLanguage: 'ja',
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: 'https://ushiku-hub.jp/?search={search_term_string}',
+        'query-input': 'required name=search_term_string',
+      },
+    },
+    {
+      '@type': 'Organization',
+      name: '牛久ナビ',
+      url: 'https://ushiku-hub.jp',
+      areaServed: {
+        '@type': 'City',
+        name: '牛久市',
+        containedInPlace: { '@type': 'State', name: '茨城県' },
+      },
+    },
+  ],
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -53,7 +81,12 @@ export default function RootLayout({
     <html lang="ja" suppressHydrationWarning>
       <head>
         <link rel="icon" href="/favicon.ico" />
+        <link rel="alternate" type="application/rss+xml" title="牛久ナビ RSS" href="/feed.xml" />
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
