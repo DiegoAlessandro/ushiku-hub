@@ -4,6 +4,7 @@ const { finalizeStoreData } = require("./data-finalizer");
 
 /**
  * 統合型：Instagramから牛久の情報を収集し、AIで加工してサイトに反映する
+ * ※ OpenClaw Agent 環境でのみ動作（web_search は openclaw-core 提供）
  */
 async function integratedCollector() {
   console.log("🚀 Integrated Collector Started...");
@@ -20,29 +21,45 @@ async function integratedCollector() {
     "site:instagram.com #牛久習い事"
   ];
 
-  for (const query of queries) {
-    const results = await web_search({ query, count: 5, search_lang: "jp" });
+  let totalCollected = 0;
 
-    for (const result of results.results) {
+  for (const query of queries) {
+    try {
+      const results = await web_search({ query, count: 5, search_lang: "jp" });
+
+      if (!results?.results?.length) {
+        console.log(`⚠️ No results for: ${query}`);
+        continue;
+      }
+
+      console.log(`🔍 ${query} → ${results.results.length} results`);
+
+      for (const result of results.results) {
         const storeNameMatch = result.title.match(/@([a-zA-Z0-9._]+)/) || result.title.match(/(.*?) \(/);
         const storeName = storeNameMatch ? storeNameMatch[1] : result.title.split(' • ')[0];
 
-        const rawData = {
-            name: storeName,
-            category: 'other', // AIが後で修正する
-            source: 'instagram',
-            sourceUrl: result.url,
-            content: result.description || "内容なし",
-            imageUrl: "", // 必要に応じて画像抽出プロトタイプと統合
-            postedAt: new Date().toISOString()
-        };
+        if (!storeName || storeName.length < 2) continue;
 
-        await finalizeStoreData(rawData);
+        // finalizeStoreData 経由（品質ゲート + AI enrichment）
+        await finalizeStoreData({
+          name: storeName,
+          category: 'other', // AI が後で修正する
+          source: 'instagram',
+          sourceUrl: result.url,
+          content: result.description || result.title,
+          imageUrl: '',
+          postedAt: new Date().toISOString(),
+          rawContent: result.description || undefined,
+        });
+
+        totalCollected++;
+      }
+    } catch (err: any) {
+      console.error(`❌ Error for query "${query}":`, err.message);
     }
   }
 
-  console.log("🏁 Integrated Collection Cycle Finished.");
+  console.log(`\n🏁 Integrated Collection Finished. (${totalCollected} items processed)`);
 }
 
-// 実行
-// integratedCollector();
+integratedCollector();
